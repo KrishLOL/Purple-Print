@@ -1,0 +1,284 @@
+// Prisma schema for Western Eng Insider
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Term {
+  FALL
+  WINTER
+  SUMMER
+}
+
+enum GradeBucket {
+  A
+  B
+  C
+  D
+  F
+  PREFER_NOT_TO_SAY
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  REMOVED
+}
+
+enum ReportReason {
+  SPAM
+  HARASSMENT
+  DEFAMATION
+  PERSONAL_INFO
+  OFF_TOPIC
+  OTHER
+}
+
+enum ReportStatus {
+  OPEN
+  ACTIONED
+  DISMISSED
+}
+
+enum Role {
+  STUDENT
+  MOD
+  ADMIN
+}
+
+// ---------------------------------------------------------------------------
+// Core catalog
+// ---------------------------------------------------------------------------
+
+model Discipline {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  code        String  @unique
+  blurb       String
+  colorAccent String
+  glyphKey    String
+
+  courses     Course[]
+  professors  Professor[]
+  users       User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Course {
+  id            String @id @default(cuid())
+  code          String @unique
+  title         String
+  description   String
+
+  disciplineId String?
+  discipline   Discipline? @relation(fields: [disciplineId], references: [id])
+
+  yearLevel          Int
+  termsOffered       Term[]
+  isCore             Boolean @default(true)
+  isFirstYearCommon  Boolean @default(false)
+
+  antirequisites String?
+  prerequisites  String?
+
+  // denormalized aggregates, recomputed on review write inside lib/ratings.ts
+  reviewCount  Int   @default(0)
+  avgUseful    Float @default(0)
+  avgEasy      Float @default(0)
+  avgLiked     Float @default(0)
+  avgWorkload  Float @default(0)
+
+  isSeedData Boolean @default(false)
+
+  professors CourseProfessor[]
+  reviews    Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([disciplineId])
+  @@index([yearLevel])
+}
+
+model Professor {
+  id          String @id @default(cuid())
+  firstName   String
+  lastName    String
+  slug        String @unique
+  title       String
+  profileUrl  String?
+
+  disciplineId String?
+  discipline   Discipline? @relation(fields: [disciplineId], references: [id])
+
+  // placeholder for a future claim/response flow
+  hasResponded Boolean @default(false)
+
+  // denormalized aggregates, recomputed on review write inside lib/ratings.ts
+  reviewCount    Int   @default(0)
+  avgClarity     Float @default(0)
+  avgHelpfulness Float @default(0)
+  avgRetakePct   Float @default(0)
+  avgRating      Float @default(0)
+
+  isSeedData Boolean @default(false)
+
+  courses CourseProfessor[]
+  reviews Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([disciplineId])
+}
+
+model CourseProfessor {
+  id             String @id @default(cuid())
+  courseId       String
+  professorId    String
+  lastTaughtTerm String?
+
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  professor Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, professorId])
+  @@index([professorId])
+}
+
+// ---------------------------------------------------------------------------
+// Users
+// ---------------------------------------------------------------------------
+
+model User {
+  id          String  @id @default(cuid())
+  email       String  @unique
+  emailHash   String
+  emailDomain String
+
+  disciplineId String?
+  discipline   Discipline? @relation(fields: [disciplineId], references: [id])
+  gradYear     Int?
+
+  role     Role    @default(STUDENT)
+  isBanned Boolean @default(false)
+
+  isSeedData Boolean @default(false)
+
+  reviews         Review[]
+  reviewVotes     ReviewVote[]
+  reviewReports   ReviewReport[]
+  moderationLogs  ModerationLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+model Review {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  professorId String?
+  professor   Professor? @relation(fields: [professorId], references: [id], onDelete: SetNull)
+
+  termTaken Term
+  yearTaken Int
+
+  useful  Int
+  easy    Int
+  liked   Boolean
+
+  workloadHours Int
+
+  // professor-specific, null when no professor selected
+  clarity      Int?
+  helpfulness  Int?
+  wouldRetake  Boolean?
+
+  gradeReceived GradeBucket
+
+  body   String
+  status ReviewStatus @default(PENDING)
+
+  helpfulCount Int @default(0)
+  reportCount  Int @default(0)
+
+  isSeedData Boolean @default(false)
+
+  votes   ReviewVote[]
+  reports ReviewReport[]
+
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([professorId])
+  @@index([status])
+}
+
+model ReviewVote {
+  id       String @id @default(cuid())
+  reviewId String
+  userId   String
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([reviewId, userId])
+}
+
+model ReviewReport {
+  id       String @id @default(cuid())
+  reviewId String
+  userId   String
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reason  ReportReason
+  details String?
+  status  ReportStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+
+  @@index([reviewId])
+  @@index([status])
+}
+
+model ModerationLog {
+  id       String @id @default(cuid())
+  actorId  String
+  actor    User   @relation(fields: [actorId], references: [id])
+
+  action     String
+  targetType String
+  targetId   String
+  reason     String
+
+  createdAt DateTime @default(now())
+
+  @@index([targetType, targetId])
+}

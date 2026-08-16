@@ -1,0 +1,136 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Raw palette — dark is the default surface, light ("paper") is opt-in via
+   [data-theme="light"] on <html>. See lib/fonts.ts for typography variables.
+--------------------------------------------------------------------------- */
+:root {
+  --ink: #0b0e14;
+  --paper: #f2efe9;
+  --graphite: #1a1f2b;
+  --rule: #2a3242;
+  --purple: #4f2683;
+  --purple-lit: #8b5cf6;
+  --signal: #e8ff59;
+  --good: #4ade80;
+  --warn: #fbbf24;
+  --bad: #f87171;
+
+  /* semantic tokens — dark defaults */
+  --bg: var(--ink);
+  --surface: var(--graphite);
+  --surface-raised: #232a3a;
+  --border: var(--rule);
+  --text: #edebe6;
+  --text-muted: #9aa3b2;
+  --accent: var(--purple-lit);
+  --accent-contrast: #0b0e14;
+  --grid-line: 255 255 255;
+  --grid-opacity: 0.05;
+}
+
+:root[data-theme="light"] {
+  --bg: var(--paper);
+  --surface: #fbfaf6;
+  --surface-raised: #ffffff;
+  --border: #d8d2c4;
+  --text: var(--ink);
+  --text-muted: #5b6472;
+  --accent: var(--purple);
+  --accent-contrast: #ffffff;
+  --grid-line: 11 14 20;
+  --grid-opacity: 0.05;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-contrast: var(--accent-contrast);
+
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-purple: var(--purple);
+  --color-purple-lit: var(--purple-lit);
+  --color-signal: var(--signal);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+
+  --font-heading: var(--font-space-grotesk);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* brief: "Radii stay at 2-4px" — cap every rounded-* utility site-wide */
+  --radius-xs: 1px;
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-2xl: 4px;
+  --radius-3xl: 4px;
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  position: relative;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Course codes, table data, ratings — always mono with a touch of tracking */
+.font-num {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Signature element: faint blueprint grid across the page background */
+.blueprint-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      rgb(var(--grid-line) / var(--grid-opacity)) 0 1px,
+      transparent 1px 8px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgb(var(--grid-line) / var(--grid-opacity)) 0 1px,
+      transparent 1px 8px
+    );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
