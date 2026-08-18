@@ -3,6 +3,10 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { CornerCard } from "@/components/ui/corner-card";
 import { Button } from "@/components/ui/button";
 import { SegmentedBar } from "@/components/ui/segmented-bar";
+import { MetricDial } from "@/components/ui/metric-dial";
+import { BarHistogram } from "@/components/ui/bar-histogram";
+import { DisciplineBadge } from "@/components/discipline-badge";
+import { GLYPHS } from "@/components/glyphs";
 
 export const metadata: Metadata = {
   title: "Styleguide",
@@ -111,6 +115,45 @@ export default function StyleguidePage() {
           <SegmentedBar label="Easy" percent={41} tone="warn" />
           <SegmentedBar label="Liked" percent={95} tone="good" />
           <SegmentedBar label="Not enough ratings" percent={null} />
+        </div>
+      </Section>
+
+      <Section title="Metric dials">
+        <div className="flex flex-wrap justify-center gap-8">
+          <MetricDial label="Useful" value={82} sampleSize={12} tone="accent" />
+          <MetricDial label="Easy" value={41} sampleSize={12} tone="warn" />
+          <MetricDial label="Liked" value={95} sampleSize={12} tone="good" />
+          <MetricDial label="Not enough ratings" value={null} sampleSize={1} />
+        </div>
+      </Section>
+
+      <Section title="Bar histogram">
+        <div className="max-w-sm">
+          <BarHistogram
+            buckets={[
+              { label: "0-3", count: 2 },
+              { label: "4-6", count: 8 },
+              { label: "7-9", count: 5 },
+              { label: "10-12", count: 3 },
+              { label: "13+", count: 1 },
+            ]}
+          />
+        </div>
+      </Section>
+
+      <Section title="Discipline glyphs & badges">
+        <div className="mb-6 flex flex-wrap gap-3">
+          <DisciplineBadge name="Mechanical Engineering" colorAccent="#F472B6" glyphKey="gear" />
+          <DisciplineBadge name="Software Engineering" colorAccent="#C084FC" glyphKey="bracket" />
+          <DisciplineBadge name="Civil Engineering" colorAccent="#EA580C" glyphKey="truss" />
+        </div>
+        <div className="grid grid-cols-3 gap-3 sm:grid-cols-9">
+          {Object.entries(GLYPHS).map(([key, Glyph]) => (
+            <div key={key} className="flex flex-col items-center gap-1 border border-border p-3">
+              <Glyph className="h-5 w-5" />
+              <span className="font-num text-[10px] text-text-muted">{key}</span>
+            </div>
+          ))}
         </div>
       </Section>
 
