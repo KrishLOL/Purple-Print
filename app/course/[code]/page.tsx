@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
 import { getCourseDetail } from "@/lib/course-detail";
 import { MetricDial } from "@/components/ui/metric-dial";
 import { BarHistogram } from "@/components/ui/bar-histogram";
@@ -8,6 +10,7 @@ import { CornerCard } from "@/components/ui/corner-card";
 import { DisciplineBadge } from "@/components/discipline-badge";
 import { CourseReviewList } from "@/components/course/review-list";
 import { StickyWriteReviewCta } from "@/components/sticky-cta";
+import { SaveCourseButton } from "@/components/course/save-course-button";
 
 const TERM_LABELS: Record<string, string> = { FALL: "Fall", WINTER: "Winter", SUMMER: "Summer" };
 
@@ -36,10 +39,22 @@ export default async function CoursePage({
 
   const { course, professorCards, reviewCards, workloadBuckets, gradeBuckets, useful, easy, liked } = detail;
 
+  const session = await auth();
+  const alreadySaved = session?.user
+    ? Boolean(
+        await prisma.savedCourse.findUnique({
+          where: { userId_courseId: { userId: session.user.id, courseId: course.id } },
+        }),
+      )
+    : false;
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-8">
       <header className="border-b border-border pb-6">
-        <p className="font-num text-sm uppercase tracking-[0.2em] text-text-muted">{course.code}</p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="font-num text-sm uppercase tracking-[0.2em] text-text-muted">{course.code}</p>
+          {session?.user && <SaveCourseButton courseId={course.id} initiallySaved={alreadySaved} />}
+        </div>
         <h1 className="mt-1 text-2xl font-semibold sm:text-3xl">{course.title}</h1>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {course.discipline && (

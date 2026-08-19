@@ -1,8 +1,8 @@
 import "dotenv/config";
-import { createHash } from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, type Term, type GradeBucket } from "../app/generated/prisma/client";
 import { recomputeCourseAggregates, recomputeProfessorAggregates } from "../lib/ratings";
+import { hashEmail } from "../lib/anonymize";
 import { FIRST_YEAR_COURSES } from "./seed-data/first-year-courses";
 import { UPPER_YEAR_COURSES } from "./seed-data/upper-year-courses";
 import {
@@ -271,7 +271,7 @@ async function seedUsers() {
     } while (usedEmails.has(email));
     usedEmails.add(email);
 
-    const emailHash = createHash("sha256").update(email).digest("hex").slice(0, 16);
+    const emailHash = hashEmail(email);
 
     await prisma.user.upsert({
       where: { email },

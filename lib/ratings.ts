@@ -31,6 +31,13 @@ export function hasEnoughReviews(reviewCount: number): boolean {
   return reviewCount >= MIN_REVIEWS_FOR_RATING;
 }
 
+/** Reviews can be edited for 30 days after creation, deleted any time after. */
+export const REVIEW_EDIT_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+
+export function isWithinEditWindow(createdAt: Date): boolean {
+  return Date.now() - createdAt.getTime() <= REVIEW_EDIT_WINDOW_MS;
+}
+
 /**
  * Returns `value` when there's enough sample size to trust it, otherwise
  * `null` — the UI renders `null` as "Not enough ratings".
