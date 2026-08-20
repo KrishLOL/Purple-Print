@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Review guidelines",
-  description: "What makes a fair, useful review on Western Eng Insider.",
+  description: "What makes a fair, useful review on Purpleprint.",
 };
 
 const DOS = [

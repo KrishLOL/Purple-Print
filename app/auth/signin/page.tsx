@@ -9,7 +9,7 @@ export default function SignInPage() {
     <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center px-4 py-16 sm:px-8">
       <h1 className="text-2xl font-semibold">Sign in</h1>
       <p className="mt-2 text-sm text-text-muted">
-        Western Eng Insider is for Western Engineering students. Sign-in is restricted to{" "}
+        Purpleprint is for Western Engineering students. Sign-in is restricted to{" "}
         <span className="font-num">@uwo.ca</span> addresses — we&rsquo;ll email you a link, no
         password needed.
       </p>

@@ -1,5 +1,5 @@
 {
-  "name": "western-eng-insider",
+  "name": "purpleprint",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "db:dev": "prisma dev --detach --name western-eng-insider",
+    "db:dev": "prisma dev --detach --name purpleprint",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "prisma db seed",

@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
 
   return (
     <main className="mx-auto max-w-sm flex-1 px-4 py-16 sm:px-8">
-      <h1 className="text-2xl font-semibold">Welcome to Western Eng Insider</h1>
+      <h1 className="text-2xl font-semibold">Welcome to Purpleprint</h1>
       <p className="mt-2 text-sm text-text-muted">
         Tell us your discipline and grad year so reviews you write can be attributed like
         &ldquo;Mechanical Eng., Class of &apos;27&rdquo; — never your name. Optional, and you can

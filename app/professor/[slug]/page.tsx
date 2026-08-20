@@ -63,13 +63,13 @@ export default async function ProfessorPage({
         </div>
         <div className="mt-4 flex flex-wrap gap-4 text-xs">
           <a
-            href={`mailto:corrections@westerneninsider.example?subject=${correctionSubject}`}
+            href={`mailto:corrections@purpleprint.example?subject=${correctionSubject}`}
             className="text-accent underline underline-offset-4"
           >
             Request a correction
           </a>
           <a
-            href={`mailto:reports@westerneninsider.example?subject=${reportSubject}`}
+            href={`mailto:reports@purpleprint.example?subject=${reportSubject}`}
             className="text-bad underline underline-offset-4"
           >
             Report an inaccurate review

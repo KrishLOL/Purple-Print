@@ -8,8 +8,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Western Eng Insider",
-    template: "%s — Western Eng Insider",
+    default: "Purpleprint",
+    template: "%s — Purpleprint",
   },
   description:
     "Course and professor reviews for Western University's Faculty of Engineering, written by students.",

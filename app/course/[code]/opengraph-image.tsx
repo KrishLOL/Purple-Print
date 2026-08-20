@@ -39,7 +39,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div style={{ display: "flex", fontSize: 30, color: accent }}>{usefulLabel}</div>
           <div style={{ display: "flex", fontSize: 26, color: "#9AA3B2", letterSpacing: 2 }}>
-            WESTERN ENG INSIDER
+            PURPLEPRINT
           </div>
         </div>
       </div>

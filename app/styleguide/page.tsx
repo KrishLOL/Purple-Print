@@ -41,7 +41,7 @@ export default function StyleguidePage() {
       <header className="flex items-center justify-between border-b border-border py-8">
         <div>
           <p className="font-num text-xs uppercase tracking-[0.2em] text-text-muted">
-            Western Eng Insider
+            Purpleprint
           </p>
           <h1 className="text-2xl font-semibold sm:text-3xl">Styleguide</h1>
         </div>

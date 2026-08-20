@@ -24,8 +24,8 @@ export async function sendMagicLinkEmail({
   await transport.sendMail({
     to: email,
     from: provider.from,
-    subject: "Sign in to Western Eng Insider",
-    text: `Sign in to Western Eng Insider by opening this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
-    html: `<p>Sign in to Western Eng Insider by opening this link:</p><p><a href="${url}">${url}</a></p><p>If you didn't request this, you can ignore this email.</p>`,
+    subject: "Sign in to Purpleprint",
+    text: `Sign in to Purpleprint by opening this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
+    html: `<p>Sign in to Purpleprint by opening this link:</p><p><a href="${url}">${url}</a></p><p>If you didn't request this, you can ignore this email.</p>`,
   });
 }

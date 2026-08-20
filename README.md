@@ -1,4 +1,4 @@
-# Western Eng Insider
+# Purpleprint
 
 Course and professor reviews for Western University's Faculty of Engineering. Not affiliated
 with Western University or the Faculty of Engineering — built by students, reviews are
@@ -43,7 +43,7 @@ than just using Neon:
   full day of work; if you hit `ECONNREFUSED` or "Connection terminated unexpectedly" repeatedly,
   switch to Neon or Docker rather than fighting it.
 - **Docker** — `docker-compose.yml` is included if you'd rather run real Postgres locally. Switch
-  `DATABASE_URL` to `postgresql://weu:weu@localhost:5432/western_eng_insider?schema=public` and run
+  `DATABASE_URL` to `postgresql://weu:weu@localhost:5432/purpleprint?schema=public` and run
   `docker compose up -d`.
 
 ### Scripts
