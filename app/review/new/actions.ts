@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { recomputeCourseAggregates, recomputeProfessorAggregates } from "@/lib/ratings";
 import { reviewFormSchema, type ReviewFormValues } from "@/lib/review-schema";
+import { screenReview } from "@/lib/moderation";
+import { logModerationAction } from "@/lib/mod-log";
 
 const MAX_REVIEWS_PER_DAY = 5;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -31,11 +33,18 @@ export async function submitReview(values: ReviewFormValues): Promise<SubmitRevi
     return { ok: false, error: `You've hit the limit of ${MAX_REVIEWS_PER_DAY} reviews per day. Try again tomorrow.` };
   }
 
+  const allProfessors = await prisma.professor.findMany({
+    select: { firstName: true, lastName: true },
+  });
+  const professorNames = allProfessors.flatMap((p) => [
+    `${p.firstName} ${p.lastName}`,
+    p.lastName,
+  ]);
+  const verdict = screenReview(data.body, professorNames);
+
   try {
     await prisma.$transaction(async (tx) => {
-      // TODO (milestone 6): gate this behind the profanity/slur wordlist
-      // filter instead of always publishing — see MODERATION in the brief.
-      await tx.review.create({
+      const review = await tx.review.create({
         data: {
           userId,
           courseId: data.courseId,
@@ -51,10 +60,23 @@ export async function submitReview(values: ReviewFormValues): Promise<SubmitRevi
           wouldRetake: data.wouldRetake,
           gradeReceived: data.gradeReceived,
           body: data.body,
-          status: "PUBLISHED",
+          status: verdict.status,
         },
       });
 
+      if (verdict.status === "PENDING") {
+        await logModerationAction(tx, {
+          actorId: userId,
+          action: "AUTO_HOLD",
+          targetType: "Review",
+          targetId: review.id,
+          reason: verdict.reasons.join("; "),
+        });
+      }
+
+      // Aggregates only ever count PUBLISHED reviews (see lib/ratings.ts),
+      // so this is a no-op when the review lands PENDING — still safe and
+      // correct to call unconditionally.
       await recomputeCourseAggregates(tx, data.courseId);
       if (data.professorId) {
         await recomputeProfessorAggregates(tx, data.professorId);

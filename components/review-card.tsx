@@ -1,3 +1,5 @@
+import { ReportReviewButton } from "@/components/review/report-review-button";
+
 const TERM_LABELS: Record<string, string> = { FALL: "Fall", WINTER: "Winter", SUMMER: "Summer" };
 const GRADE_LABELS: Record<string, string> = {
   A: "A",
@@ -68,6 +70,7 @@ export function ReviewCard({ review }: { review: ReviewCardData }) {
         <span className="font-num ml-auto text-text-muted">
           {review.helpfulCount} found this helpful
         </span>
+        <ReportReviewButton reviewId={review.id} />
       </footer>
     </article>
   );

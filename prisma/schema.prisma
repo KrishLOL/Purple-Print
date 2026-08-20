@@ -330,6 +330,7 @@ model ReviewReport {
 
   createdAt DateTime @default(now())
 
+  @@unique([reviewId, userId])
   @@index([reviewId])
   @@index([status])
 }
