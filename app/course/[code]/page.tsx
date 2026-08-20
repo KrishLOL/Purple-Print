@@ -11,6 +11,7 @@ import { DisciplineBadge } from "@/components/discipline-badge";
 import { CourseReviewList } from "@/components/course/review-list";
 import { StickyWriteReviewCta } from "@/components/sticky-cta";
 import { SaveCourseButton } from "@/components/course/save-course-button";
+import { buildCourseJsonLd } from "@/lib/json-ld";
 
 const TERM_LABELS: Record<string, string> = { FALL: "Fall", WINTER: "Winter", SUMMER: "Summer" };
 
@@ -48,8 +49,17 @@ export default async function CoursePage({
       )
     : false;
 
+  const jsonLd = buildCourseJsonLd({
+    code: course.code,
+    title: course.title,
+    description: course.description,
+    reviewCount: course.reviewCount,
+    avgUseful: course.avgUseful,
+  });
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-8 sm:px-8">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="border-b border-border pb-6">
         <div className="flex items-start justify-between gap-3">
           <p className="font-num text-sm uppercase tracking-[0.2em] text-text-muted">{course.code}</p>

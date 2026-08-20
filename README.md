@@ -13,8 +13,7 @@ Next.js 16 (App Router, TS strict) · Tailwind CSS v4 · Prisma 7 (`prisma-clien
 
 ```bash
 pnpm install
-cp .env.example .env      # then fill in DATABASE_URL etc.
-pnpm db:dev                # starts a local Postgres via `prisma dev` (no Docker needed)
+cp .env.example .env      # then fill in DATABASE_URL etc. — see "Database" below
 pnpm db:push                # push the schema
 pnpm db:seed                # seed disciplines (+ courses/profs/reviews from milestone 2 on)
 pnpm dev
@@ -22,13 +21,28 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000). The design system lives at `/styleguide`.
 
-### Local Postgres, two ways
+### Database
 
-- **`prisma dev`** (default, no install required) — `pnpm db:dev` starts it, `pnpm exec prisma dev ls`
-  shows the connection strings. Use the raw TCP `postgres://...` string (not the `prisma+postgres://`
-  one) for `DATABASE_URL` — the driver adapter needs a wire-protocol-compatible URL, not Prisma's
-  proxy protocol.
-- **Docker** — `docker-compose.yml` is included if you'd rather run real Postgres. Switch
+Point `DATABASE_URL` at any reachable Postgres instance. This project develops against a free
+[Neon](https://neon.tech) Postgres branch — it needs no local install and doesn't sit behind a
+process you have to keep alive. Two things worth knowing if you're on Neon too:
+
+- Use the direct (non-pooled) connection string, `sslmode=require`.
+- Reads can lag a just-committed write by up to ~1-2s on Neon's proxy. The app itself never
+  reads its own write in the same request, so this doesn't affect normal usage — but if you
+  write test helpers that read back a mutation immediately, poll instead of reading once (see
+  `tests/e2e/report-review.spec.ts` for the pattern).
+
+Two local alternatives are also wired up, though both proved less reliable during development
+than just using Neon:
+
+- **`prisma dev`** — `pnpm db:dev` starts it, `pnpm exec prisma dev ls` shows the connection
+  strings. Use the raw TCP `postgres://...` string (not the `prisma+postgres://` one) for
+  `DATABASE_URL` — the driver adapter needs a wire-protocol-compatible URL, not Prisma's proxy
+  protocol. In practice this crashed/dropped its connection often enough to be unusable for a
+  full day of work; if you hit `ECONNREFUSED` or "Connection terminated unexpectedly" repeatedly,
+  switch to Neon or Docker rather than fighting it.
+- **Docker** — `docker-compose.yml` is included if you'd rather run real Postgres locally. Switch
   `DATABASE_URL` to `postgresql://weu:weu@localhost:5432/western_eng_insider?schema=public` and run
   `docker compose up -d`.
 
@@ -38,8 +52,9 @@ Open [http://localhost:3000](http://localhost:3000). The design system lives at 
 | --- | --- |
 | `pnpm dev` / `build` / `start` | Next.js |
 | `pnpm lint` | ESLint |
-| `pnpm test` | Vitest |
-| `pnpm db:dev` | Start local Postgres via `prisma dev` |
+| `pnpm test` | Vitest (unit tests) |
+| `pnpm test:e2e` | Playwright (end-to-end tests; starts `pnpm dev` itself if it isn't already running) |
+| `pnpm db:dev` | Start local Postgres via `prisma dev` (see caveats above) |
 | `pnpm db:push` | Push `prisma/schema.prisma` to the DB |
 | `pnpm db:seed` | Run `prisma/seed.ts` |
 | `pnpm db:reset` | Force-reset the schema and reseed |
