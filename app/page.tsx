@@ -1,22 +1,110 @@
 import Link from "next/link";
+import { getLandingData } from "@/lib/landing";
+import { AnimatedNumber } from "@/components/ui/animated-number";
+import { DisciplineCard } from "@/components/home/discipline-card";
+import { HeroSearch } from "@/components/home/hero-search";
+import { CornerCard } from "@/components/ui/corner-card";
 
-export default function Home() {
+export default async function Home() {
+  const { stats, disciplines, topRated, recentlyReviewed } = await getLandingData();
+
   return (
-    <main className="flex flex-1 flex-col items-center justify-center px-4 py-24 text-center">
-      <p className="font-num text-xs uppercase tracking-[0.2em] text-text-muted">
-        Faculty of Engineering &middot; Western University
-      </p>
-      <h1 className="mt-4 max-w-2xl text-4xl font-semibold sm:text-5xl">
-        Western Eng Insider
-      </h1>
-      <p className="mt-4 max-w-md text-sm text-text-muted">
-        Course and professor reviews, built by students. Under construction — the design system
-        lives at{" "}
-        <Link href="/styleguide" className="text-accent underline underline-offset-4">
-          /styleguide
+    <main className="mx-auto max-w-6xl px-4 py-16 sm:px-8">
+      <section className="text-center">
+        <p className="font-num text-xs uppercase tracking-[0.2em] text-text-muted">
+          Faculty of Engineering &middot; Western University
+        </p>
+        <h1 className="mx-auto mt-4 max-w-2xl text-4xl font-semibold sm:text-5xl">
+          Know before you register.
+        </h1>
+        <p className="mx-auto mt-4 max-w-md text-sm text-text-muted">
+          Course and professor reviews written by Western Engineering students, for Western
+          Engineering students.
+        </p>
+        <div className="mt-8">
+          <HeroSearch />
+        </div>
+
+        <dl className="font-num mt-10 flex flex-wrap justify-center gap-x-10 gap-y-4 text-sm">
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Courses</dt>
+            <dd className="text-2xl font-semibold">
+              <AnimatedNumber value={stats.courseCount} />
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Professors</dt>
+            <dd className="text-2xl font-semibold">
+              <AnimatedNumber value={stats.professorCount} />
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Reviews</dt>
+            <dd className="text-2xl font-semibold">
+              <AnimatedNumber value={stats.reviewCount} />
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <section className="mt-20 border-t border-border pt-10">
+        <div className="mb-6 flex items-baseline justify-between">
+          <h2 className="text-xs uppercase tracking-wider text-text-muted">Browse by discipline</h2>
+          <Link href="/browse" className="text-xs text-accent underline underline-offset-4">
+            See all courses
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {disciplines.map((d) => (
+            <DisciplineCard key={d.slug} discipline={d} />
+          ))}
+        </div>
+      </section>
+
+      {topRated.length > 0 && (
+        <section className="mt-16 border-t border-border pt-10">
+          <h2 className="mb-6 text-xs uppercase tracking-wider text-text-muted">Top rated</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {topRated.map((c) => (
+              <Link key={c.code} href={`/course/${encodeURIComponent(c.code)}`}>
+                <CornerCard className="h-full transition-colors hover:border-accent">
+                  <p className="font-num text-xs uppercase tracking-wider text-text-muted">{c.code}</p>
+                  <h3 className="mt-1 text-sm font-semibold">{c.title}</h3>
+                  <p className="font-num mt-2 text-xs text-text-muted">
+                    {c.useful}% useful &middot; {c.reviewCount} review{c.reviewCount === 1 ? "" : "s"}
+                  </p>
+                </CornerCard>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {recentlyReviewed.length > 0 && (
+        <section className="mt-16 border-t border-border pt-10">
+          <h2 className="mb-6 text-xs uppercase tracking-wider text-text-muted">Recently reviewed</h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {recentlyReviewed.map((c) => (
+              <Link key={c.code} href={`/course/${encodeURIComponent(c.code)}`}>
+                <CornerCard className="h-full transition-colors hover:border-accent">
+                  <p className="font-num text-xs uppercase tracking-wider text-text-muted">{c.code}</p>
+                  <h3 className="mt-1 text-sm font-semibold">{c.title}</h3>
+                </CornerCard>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="mt-16 border-t border-border pt-10 text-center">
+        <p className="text-sm text-text-muted">Comparing electives?</p>
+        <Link
+          href="/compare"
+          className="font-num mt-3 inline-block border border-accent bg-accent px-5 py-2.5 text-xs uppercase tracking-wider text-accent-contrast hover:opacity-90"
+        >
+          Compare courses side by side
         </Link>
-        .
-      </p>
+      </section>
     </main>
   );
 }

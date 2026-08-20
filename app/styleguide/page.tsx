@@ -7,6 +7,7 @@ import { MetricDial } from "@/components/ui/metric-dial";
 import { BarHistogram } from "@/components/ui/bar-histogram";
 import { DisciplineBadge } from "@/components/discipline-badge";
 import { GLYPHS } from "@/components/glyphs";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 export const metadata: Metadata = {
   title: "Styleguide",
@@ -125,6 +126,23 @@ export default function StyleguidePage() {
           <MetricDial label="Liked" value={95} sampleSize={12} tone="good" />
           <MetricDial label="Not enough ratings" value={null} sampleSize={1} />
         </div>
+      </Section>
+
+      <Section title="Animated number">
+        <dl className="font-num flex gap-10">
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Courses</dt>
+            <dd className="text-2xl font-semibold">
+              <AnimatedNumber value={98} />
+            </dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Reviews</dt>
+            <dd className="text-2xl font-semibold">
+              <AnimatedNumber value={145} />
+            </dd>
+          </div>
+        </dl>
       </Section>
 
       <Section title="Bar histogram">
