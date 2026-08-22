@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { getLandingData } from "@/lib/landing";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { DisciplineCard } from "@/components/home/discipline-card";
+import { DisciplineTabs } from "@/components/home/discipline-tabs";
 import { HeroSearch } from "@/components/home/hero-search";
 import { CornerCard } from "@/components/ui/corner-card";
 
 export default async function Home() {
-  const { stats, disciplines, topRated, recentlyReviewed } = await getLandingData();
+  const { stats, coreDisciplines, combinedDegreeDisciplines, topRated, recentlyReviewed } =
+    await getLandingData();
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-16 sm:px-8">
@@ -54,11 +55,10 @@ export default async function Home() {
             See all courses
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {disciplines.map((d) => (
-            <DisciplineCard key={d.slug} discipline={d} />
-          ))}
-        </div>
+        <DisciplineTabs
+          coreDisciplines={coreDisciplines}
+          combinedDegreeDisciplines={combinedDegreeDisciplines}
+        />
       </section>
 
       {topRated.length > 0 && (

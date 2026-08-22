@@ -20,10 +20,27 @@ const prisma = new PrismaClient({ adapter });
 const rand = mulberry32(42); // fixed seed: seed data is reproducible across `pnpm db:reset`
 
 /**
- * 8 real Western Engineering programs + First Year (Common). "Computer
- * Engineering" is deliberately absent — it was discontinued as a standalone
- * Western degree in September 2022; its courses are folded into Electrical
- * Engineering below, since the ECE department now serves both.
+ * 7 core Western Engineering programs + First Year (Common), plus 2
+ * combined/concurrent degrees that layer dedicated courses on top of a
+ * base discipline rather than replacing it (isCombinedDegree: true).
+ *
+ * "Computer Engineering" is deliberately absent — it was discontinued as a
+ * standalone Western degree in September 2022; its courses are folded into
+ * Electrical Engineering below, since the ECE department now serves both.
+ *
+ * "Green Process Engineering" is also absent — confirmed discontinued as a
+ * standalone program (it no longer appears on eng.uwo.ca's current program
+ * list, and `GPE` is no longer a subject on the live academic calendar;
+ * its courses were folded into Chemical & Biochemical Engineering).
+ *
+ * AISE (Artificial Intelligence Systems Engineering) and Biomedical
+ * Engineering are real concurrent/combined-degree programs — Western
+ * students take them alongside one of Chemical/Civil/Electrical/
+ * Mechanical/Mechatronics, with their own dedicated course codes (AISE,
+ * BME) confirmed on the live calendar. HBA (the Ivey Business combined
+ * degree) is a third real combined degree, but has no dedicated
+ * engineering-side course codes of its own — see the static card in
+ * components/home/discipline-tabs.tsx instead of a seeded Discipline row.
  */
 const DISCIPLINES = [
   {
@@ -32,7 +49,7 @@ const DISCIPLINES = [
     code: "FYC",
     glyphKey: "compass",
     colorAccent: "#64748B",
-    blurb: "Every Western Engineering student's first two terms, shared across all eight disciplines.",
+    blurb: "Every Western Engineering student's first two terms, shared across all seven disciplines.",
   },
   {
     name: "Chemical Engineering",
@@ -57,14 +74,6 @@ const DISCIPLINES = [
     glyphKey: "wave",
     colorAccent: "#EAB308",
     blurb: "Power, signals, and the digital systems now built on top of them.",
-  },
-  {
-    name: "Green Process Engineering",
-    slug: "green-process",
-    code: "GPE",
-    glyphKey: "leaf",
-    colorAccent: "#16A34A",
-    blurb: "Chemical engineering pointed at sustainability from day one.",
   },
   {
     name: "Integrated Engineering",
@@ -97,6 +106,24 @@ const DISCIPLINES = [
     glyphKey: "bracket",
     colorAccent: "#C084FC",
     blurb: "Systems, not scripts — engineering discipline applied to code.",
+  },
+  {
+    name: "Artificial Intelligence Systems Engineering",
+    slug: "aise",
+    code: "AISE",
+    glyphKey: "neural",
+    colorAccent: "#F97316",
+    blurb: "A concurrent degree layering AI/ML systems courses on top of a core engineering discipline.",
+    isCombinedDegree: true,
+  },
+  {
+    name: "Biomedical Engineering",
+    slug: "biomedical",
+    code: "BME",
+    glyphKey: "pulse",
+    colorAccent: "#F43F5E",
+    blurb: "A concurrent degree layering medical-device and biological-systems courses on top of a core discipline.",
+    isCombinedDegree: true,
   },
 ];
 

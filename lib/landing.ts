@@ -9,6 +9,17 @@ export type DisciplineSummary = {
   courseCount: number;
 };
 
+const CORE_DISCIPLINE_ORDER = [
+  "first-year",
+  "chemical",
+  "civil",
+  "electrical",
+  "integrated",
+  "mechanical",
+  "mechatronics",
+  "software",
+];
+
 export type TopRatedCourse = {
   code: string;
   title: string;
@@ -34,6 +45,7 @@ export async function getLandingData() {
           name: true,
           colorAccent: true,
           glyphKey: true,
+          isCombinedDegree: true,
           _count: { select: { courses: true } },
         },
         orderBy: { name: "asc" },
@@ -74,17 +86,25 @@ export async function getLandingData() {
     reviewedAt: r.createdAt.toISOString(),
   }));
 
-  const disciplineSummaries: DisciplineSummary[] = disciplines.map((d) => ({
+  const toSummary = (d: (typeof disciplines)[number]): DisciplineSummary => ({
     slug: d.slug,
     name: d.name,
     colorAccent: d.colorAccent,
     glyphKey: d.glyphKey,
     courseCount: d._count.courses,
-  }));
+  });
+
+  const coreDisciplines = disciplines
+    .filter((d) => !d.isCombinedDegree)
+    .map(toSummary)
+    .sort((a, b) => CORE_DISCIPLINE_ORDER.indexOf(a.slug) - CORE_DISCIPLINE_ORDER.indexOf(b.slug));
+
+  const combinedDegreeDisciplines = disciplines.filter((d) => d.isCombinedDegree).map(toSummary);
 
   return {
     stats: { courseCount, professorCount, reviewCount },
-    disciplines: disciplineSummaries,
+    coreDisciplines,
+    combinedDegreeDisciplines,
     topRated,
     recentlyReviewed,
   };

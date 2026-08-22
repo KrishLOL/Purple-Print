@@ -104,6 +104,28 @@ export function BracketGlyph(props: GlyphProps) {
   );
 }
 
+/** AI Systems Engineering — a triangular neural net with an active node. */
+export function NeuralGlyph(props: GlyphProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="5" r="2" />
+      <circle cx="5" cy="18" r="2" />
+      <circle cx="19" cy="18" r="2" />
+      <path d="M10.6 6.7 6.4 16.3M13.4 6.7l4.2 9.6M7 18h10" />
+      <circle cx="12" cy="12.5" r="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Biomedical Engineering — an EKG pulse line. */
+export function PulseGlyph(props: GlyphProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M2 12h4l2-7 4 14 2-7h4l2 3h2" />
+    </svg>
+  );
+}
+
 export const GLYPHS = {
   compass: CompassGlyph,
   beaker: BeakerGlyph,
@@ -114,6 +136,8 @@ export const GLYPHS = {
   gear: GearGlyph,
   chip: ChipGlyph,
   bracket: BracketGlyph,
+  neural: NeuralGlyph,
+  pulse: PulseGlyph,
 } as const;
 
 export type GlyphKey = keyof typeof GLYPHS;

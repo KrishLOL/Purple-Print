@@ -69,6 +69,12 @@ model Discipline {
   colorAccent String
   glyphKey    String
 
+  // Combined/concurrent degrees (e.g. AISE, Biomedical Engineering) layer
+  // extra dedicated courses on top of a base discipline rather than
+  // replacing it — kept separate so the homepage can group them apart
+  // from the seven core disciplines + First Year.
+  isCombinedDegree Boolean @default(false)
+
   courses     Course[]
   professors  Professor[]
   users       User[]

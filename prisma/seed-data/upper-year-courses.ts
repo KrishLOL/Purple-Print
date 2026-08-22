@@ -26,21 +26,19 @@ export type UpperYearCourse = {
  * - Integrated Engineering's upper-year prefix is `IE`, not `ES` — `ES` is
  *   only used for the four first-year common courses.
  *
- * Green Process Engineering and Integrated Engineering have fewer
- * dedicated courses than the other disciplines (5 and 11 respectively) —
- * that's a real, small-catalogue program, not a seeding shortcut. GPE
- * students also take several CBE courses in practice, but those are
- * already seeded once under Chemical Engineering (Course.code is unique
- * per course, not per discipline) rather than duplicated here.
+ * Integrated Engineering has fewer dedicated courses than the other core
+ * disciplines (11) — that's a real, small-catalogue program, not a
+ * seeding shortcut.
  *
- * `GPE` is no longer a valid subject on the live calendar at all — its
- * courses appear to have been folded into Chemical & Biochemical
- * Engineering (CBE), and the live CBE 4484A/B page explicitly lists
- * "Former GPE 4484A/B" as an antirequisite, confirming that one rename.
- * The other four GPE courses' likely CBE successors are less certain (no
- * explicit rename statement on the calendar), so their prerequisites are
- * left unconfirmed here rather than guessed — verify with the department
- * before publishing specific prerequisite chains for them.
+ * Green Process Engineering has been removed entirely (see DISCIPLINES in
+ * seed.ts) — it's confirmed discontinued as a standalone program, not just
+ * renamed course codes.
+ *
+ * `aise` and `biomedical` are combined/concurrent degrees (Discipline.
+ * isCombinedDegree = true in seed.ts) — students take these alongside a
+ * core discipline, and only their own dedicated courses (confirmed on the
+ * live calendar under the AISE/BME subjects) are seeded here, not the
+ * shared core-discipline courses they also take.
  */
 export const UPPER_YEAR_COURSES: Record<string, UpperYearCourse[]> = {
   chemical: [
@@ -87,12 +85,29 @@ export const UPPER_YEAR_COURSES: Record<string, UpperYearCourse[]> = {
     { code: "ECE 4464A/B", title: "Electric Power Systems II", description: "Power flow, faults, stability, and HVDC/FACTS.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "ECE 3333A/B.", antirequisites: "None." },
     { code: "ECE 4416", title: "Electrical/Computer Design Project", description: "Capstone design project.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Completion of third year of the Electrical, Computer, or Integrated Engineering programs.", antirequisites: "CBE 4497; CEE 4441; MME 4499; SE 4450; Engineering Science 4499." },
   ],
-  "green-process": [
-    { code: "GPE 2213A/B", title: "Green Chemistry I", description: "Chemistry principles applied to reducing environmental impact in process design.", yearLevel: 2, termsOffered: ["FALL"], isCore: true, prerequisites: "Not listed under a GPE subject code on the current Western Academic Calendar — Green Process Engineering appears to have been folded into Chemical & Biochemical Engineering (CBE). Confirm current prerequisites with the department; the live CBE 4417A/B page cites this course as an equivalent to CBE 2206A/B.", antirequisites: "See note under prerequisites." },
-    { code: "GPE 2214A/B", title: "Green Chemistry II", description: "Continuation of Green Chemistry I, moving into applied process contexts.", yearLevel: 2, termsOffered: ["WINTER"], isCore: true, prerequisites: "Not listed under a GPE subject code on the current Western Academic Calendar — Green Process Engineering appears to have been folded into Chemical & Biochemical Engineering (CBE). Confirm current prerequisites with the department; live calendar cross-references suggest a link to CBE 2207A/B.", antirequisites: "See note under prerequisites." },
-    { code: "GPE 3382A/B", title: "Fundamentals of Green Engineering", description: "Core principles for designing processes with sustainability built in from the start.", yearLevel: 3, termsOffered: ["FALL"], isCore: true, prerequisites: "Not listed under a GPE subject code on the current Western Academic Calendar — content appears to now be split across CBE 3316A/B and CBE 3319A/B. Confirm current prerequisites with the department.", antirequisites: "See note under prerequisites." },
-    { code: "GPE 3383A/B", title: "Solar and Fuel Cells", description: "Solar energy conversion and fuel cell technology fundamentals.", yearLevel: 3, termsOffered: ["WINTER"], isCore: true, prerequisites: "Not offered under a GPE subject code on the current Western Academic Calendar and no clear successor course was found — this course may be discontinued. Confirm current status with the department.", antirequisites: "See note under prerequisites." },
-    { code: "GPE 4484A/B", title: "Green Fuels & Chemicals", description: "Sustainable production pathways for fuels and industrial chemicals.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Now offered as CBE 4484A/B (Processes for Green Products) — the live calendar lists \"Former GPE 4484A/B\" as that course's antirequisite. Its prerequisites there: CBE 2207A/B; CBE 2224A/B; CBE 3315A/B.", antirequisites: "CBE 4484A/B." },
+  aise: [
+    { code: "AISE 2205A/B", title: "Algorithms & Data Structures for Object-Oriented Design", description: "Algorithms and data structures, taught through the AISE program's own section.", yearLevel: 2, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Computer Science 1026A/B or Engineering Science 1036A/B.", antirequisites: "Computer Science 2210A/B; SE 2205A/B." },
+    { code: "AISE 2251A/B", title: "Software Design for Systems Engineering", description: "Object-oriented and systems-level software design for AI/ML pipelines.", yearLevel: 2, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "AISE 2205A/B (or SE 2205A/B pre-2024-25); Engineering Science 1036A/B or Computer Science 1026A/B.", antirequisites: "Computer Science 2212A/B/Y; SE 2203A/B; the former SE 2251A/B." },
+    { code: "AISE 3010A/B", title: "Data Engineering and Machine Learning", description: "Building data pipelines and applying core machine learning methods to them.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "AISE 2205A/B (or SE 2205A/B); AISE 2251A/B (or SE 2203A/B); AISE 3309A/B (or SE 3309A/B); DS 3000A/B.", antirequisites: "None." },
+    { code: "AISE 3020A/B", title: "AI: Ethics, Bias and Privacy", description: "The ethical, legal, and social dimensions of deploying AI systems.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "DS 3000A/B.", antirequisites: "None." },
+    { code: "AISE 3309A/B", title: "Database Management Systems", description: "Relational databases and query languages, taught through the AISE program's own section.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "AISE 2205A/B (or SE 2205A/B pre-2024-25); AISE 2251A/B (or the former SE 2251A/B).", antirequisites: "Computer Science 3319A/B; Computer Science 3120A/B; SE 3309A/B." },
+    { code: "AISE 3350A/B", title: "Cyber-Physical Systems Theory", description: "The mathematical foundations connecting physical systems to their digital controllers.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "NMM 2270A/B; NMM 2276A/B or 2277A/B; Physics 1302A/B or 1402A/B.", antirequisites: "The former ECE 3350A/B." },
+    { code: "AISE 3351A/B", title: "Digital Systems and Signal Processing", description: "Sampling, filtering, and digital signal processing for cyber-physical systems.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "AISE 3350A/B or the former ECE 3350A/B (pre-2024-25).", antirequisites: "ECE 3331A/B; the former ECE 3351A/B." },
+    { code: "AISE 4010A/B", title: "Deep Learning for Time Series Data", description: "Neural network architectures applied to sequential and time-series data.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: false, prerequisites: "DS 3000A/B; AISE 3010A/B.", antirequisites: "None." },
+    { code: "AISE 4020A/B", title: "AI Systems Engineering Design I", description: "First half of the AISE capstone: scoping and prototyping an AI-driven system.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "DS 3000A/B; AISE 3010A/B.", antirequisites: "None." },
+    { code: "AISE 4025A/B", title: "Introduction to Computer Assisted Surgery: Theory and Practice", description: "AI and signal-processing methods applied to surgical guidance systems.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: false, prerequisites: "(Engineering Science 1036A/B or Computer Science 1025A/B or 1026A/B) and (NMM 2276A/B or 2277A/B) and ECE 4445A/B.", antirequisites: "None." },
+    { code: "AISE 4030A/B", title: "Reinforcement Learning", description: "Sequential decision-making methods, from bandits through deep RL.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: false, prerequisites: "DS 3000A/B and (NMM 2276A/B or 2277A/B).", antirequisites: "None." },
+    { code: "AISE 4050", title: "AI Systems Engineering Design II", description: "Capstone continuation: build and deliver the AI system designed in AISE 4020A/B.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Completion of fourth year of the AISE program.", antirequisites: "CBE 4497; CEE 4441; ECE 4416; MME 4499; ES 4499." },
+    { code: "AISE 4430A/B", title: "Introduction to Computer Networking, Security & IoT Systems", description: "Networking, security, and IoT fundamentals for connected AI systems.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: false, prerequisites: "AISE 2205A/B (or SE 2205A/B pre-2024-25); Engineering Science 1036A/B.", antirequisites: "Computer Science 3357A/B; ECE 4436A/B; the former SE 4430A/B." },
+    { code: "AISE 4450A/B", title: "Data Driven Control of Cyber-Physical Systems", description: "Learning-based control methods for cyber-physical and robotic systems.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: false, prerequisites: "AISE 3010A/B; AISE 3351A/B (or the former ECE 3351A/B); DS 3000A/B.", antirequisites: "The former ECE 4450A/B." },
+    { code: "AISE 4470A/B", title: "Selected Topics in AI Systems Engineering I", description: "Rotating special-topics course in AI systems engineering.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: false, prerequisites: "Completion of third year of the AISE program.", antirequisites: "None." },
+    { code: "AISE 4471A/B", title: "Selected Topics in AI Systems Engineering II", description: "Rotating special-topics course in AI systems engineering, continued.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: false, prerequisites: "Completion of fourth year of the AISE program.", antirequisites: "None." },
+  ],
+  biomedical: [
+    { code: "BME 3201A/B", title: "Fundamentals of Biomedical Engineering Design", description: "Design skills and tools for medical devices, with a focus on cardiovascular and musculoskeletal systems.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Completion of the first-year Faculty of Engineering curriculum with a minimum 80% average.", antirequisites: "MME 4470A/B." },
+    { code: "BME 3301A/B", title: "Neural Systems Engineering", description: "Neurophysiology and neural modelling — EEG, EMG, fMRI, brain-computer interfaces, and neural prosthetics.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "BME 3201A/B.", antirequisites: "None." },
+    { code: "BME 3303A/B", title: "Cellular Systems Engineering", description: "Engineering design and mathematical models applied to cellular and molecular biology.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "BME 3201A/B; Biology 1002B (or the former 1202B); Biochemistry 2280A.", antirequisites: "None." },
+    { code: "BME 4400E", title: "BME Research Project", description: "Independent research project with faculty supervision, including research ethics and two presentations.", yearLevel: 4, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Registration in the final year of the Biomedical Engineering program.", antirequisites: "CBE 4415; CBE 4425; MME 4410." },
   ],
   integrated: [
     { code: "IE 2200Y", title: "Practical Elements in Integrated Engineering", description: "Hands-on practice of the technical and software skills used across design projects.", yearLevel: 2, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Registration in the Integrated Engineering program.", antirequisites: "None." },
