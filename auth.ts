@@ -3,13 +3,13 @@ import type { Adapter, AdapterUser } from "next-auth/adapters";
 import Nodemailer from "next-auth/providers/nodemailer";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
-import { sendMagicLinkEmail } from "@/lib/mailer";
+import { sendSignInCodeEmail } from "@/lib/mailer";
 import { isRateLimited } from "@/lib/rate-limit";
 import { emailDomain, hashEmail } from "@/lib/anonymize";
 
 const UWO_DOMAIN = "uwo.ca";
-const MAGIC_LINK_MAX_PER_IP = 5;
-const MAGIC_LINK_WINDOW_MS = 15 * 60 * 1000;
+const CODE_SEND_MAX_PER_IP = 5;
+const CODE_SEND_WINDOW_MS = 15 * 60 * 1000;
 
 function isUwoEmail(email: string | null | undefined): email is string {
   return Boolean(email && email.toLowerCase().endsWith(`@${UWO_DOMAIN}`));
@@ -41,27 +41,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "database" },
   pages: {
     signIn: "/auth/signin",
-    verifyRequest: "/auth/verify-request",
+    // The user never actually lands here via a redirect — sendSignInCodeEmail
+    // (lib/mailer.ts) sends a code instead of a link, and app/auth/actions.ts
+    // sets its own pending-signin-email cookie and points people at
+    // /auth/verify-code directly. This still has to point somewhere valid
+    // for Auth.js's internal typing/config, but functionally it's unused.
+    verifyRequest: "/auth/verify-code",
     error: "/auth/error",
     newUser: "/onboarding",
   },
   providers: [
+    // Still the Nodemailer/Email provider under the hood — it's what
+    // generates and validates the real single-use verification token.
+    // sendVerificationRequest just doesn't email that token/URL directly
+    // (see lib/mailer.ts for why); the token gets redeemed via a
+    // server-to-server fetch once the user enters the code that stands in
+    // for it (see verifySignInCode in app/auth/actions.ts).
     Nodemailer({
       from: process.env.AUTH_EMAIL_FROM,
       server: process.env.AUTH_EMAIL_SERVER,
       async sendVerificationRequest(params) {
         const ip = params.request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-        if (isRateLimited(`magic-link:${ip}`, MAGIC_LINK_MAX_PER_IP, MAGIC_LINK_WINDOW_MS)) {
+        if (isRateLimited(`code-send:${ip}`, CODE_SEND_MAX_PER_IP, CODE_SEND_WINDOW_MS)) {
           throw new Error("Too many sign-in requests from this network. Try again in a few minutes.");
         }
-        await sendMagicLinkEmail(params);
+        await sendSignInCodeEmail(params);
       },
     }),
   ],
   callbacks: {
-    // Runs before the magic-link email is sent (verificationRequest phase)
-    // AND again after the user clicks the link — rejecting non-@uwo.ca
-    // addresses here means the email is never even dispatched.
+    // Runs before the sign-in code is sent (verificationRequest phase) AND
+    // again when the code is redeemed server-to-server — rejecting
+    // non-@uwo.ca addresses here means the email is never even dispatched.
     async signIn({ user }) {
       if (!isUwoEmail(user.email)) {
         return "/auth/error?reason=domain";

@@ -245,17 +245,39 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Holds the real (token-bearing) Auth.js callback URL behind an opaque id
-// while the user is on /auth/confirm. Deliberately not passed as a `?url=`
-// query param on that page: several institutional mail security scanners
-// (uwo.ca runs on Microsoft 365/Defender) specifically detect and
-// auto-follow redirect-shaped parameters like that as an anti-phishing
-// measure, which defeats the whole point of the confirm step. An opaque
-// id gives a scanner nothing to unwrap. See lib/mailer.ts.
-model PendingMagicLink {
+// Backs the sign-in flow's code-entry step. Two link-based approaches
+// (a plain magic link, then one gated behind a confirm-page click, then
+// one behind an opaque id instead of a `?url=` param) were each defeated
+// in turn by whatever scans uwo.ca mail (Microsoft 365/Defender) --
+// confirmed live, step by step against this database, that the real
+// token was being consumed at mail-delivery time, before the user had
+// even opened the message, regardless of how the link itself was shaped.
+//
+// A link is fundamentally the wrong primitive here: anything reachable by
+// an HTTP GET can be visited by something other than the user. A 6-digit
+// code emailed as plain text has no such surface -- it isn't a URL, isn't
+// clickable, and can only be "used" by a human reading it and typing it
+// into a form. targetUrl holds the real (token-bearing) Auth.js callback
+// URL, fetched server-to-server once the code is verified -- see
+// verifySignInCode in app/auth/actions.ts.
+model SignInCode {
   id        String   @id @default(cuid())
+  email     String
+  codeHash  String
   targetUrl String
+  attempts  Int      @default(0)
+  expires   DateTime
   createdAt DateTime @default(now())
+
+  // Only ever populated outside production (see lib/mailer.ts) -- dev mode
+  // already skips real email sending and logs the plaintext code to the
+  // console instead (same as the old magic-link URL did), so this isn't a
+  // new category of exposure, just making that existing dev convenience
+  // something e2e tests can read deterministically instead of scraping
+  // console output. codeHash (not this) is what's ever checked against.
+  devCode String?
+
+  @@index([email])
 }
 
 // ---------------------------------------------------------------------------

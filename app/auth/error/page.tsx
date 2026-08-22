@@ -6,8 +6,8 @@ export const metadata: Metadata = { title: "Sign-in error" };
 const MESSAGES: Record<string, string> = {
   domain: "Only @uwo.ca email addresses can sign in to Purpleprint.",
   banned: "This account has been suspended. Contact us if you think that's a mistake.",
-  "send-failed": "We couldn't send that sign-in link — you may be sending requests too quickly. Try again shortly.",
-  Verification: "That sign-in link is invalid or has expired. Request a new one.",
+  "send-failed": "We couldn't send that sign-in code — you may be sending requests too quickly. Try again shortly.",
+  Verification: "That sign-in code is invalid or has expired. Request a new one.",
   AccessDenied: "Access denied for that account.",
   Configuration: "Sign-in is temporarily unavailable. Try again later.",
 };

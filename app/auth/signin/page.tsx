@@ -10,7 +10,7 @@ export default function SignInPage() {
       <h1 className="text-2xl font-semibold">Sign in</h1>
       <p className="mt-2 text-sm text-text-muted">
         Purpleprint is for Western Engineering students. Sign-in is restricted to{" "}
-        <span className="font-num">@uwo.ca</span> addresses — we&rsquo;ll email you a link, no
+        <span className="font-num">@uwo.ca</span> addresses — we&rsquo;ll email you a code, no
         password needed.
       </p>
 
@@ -27,7 +27,7 @@ export default function SignInPage() {
           className="w-full border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:border-accent focus:outline-none"
         />
         <Button type="submit" variant="primary" className="w-full">
-          Send magic link
+          Send sign-in code
         </Button>
       </form>
     </main>

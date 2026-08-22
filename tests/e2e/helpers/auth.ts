@@ -29,7 +29,7 @@ export async function createTestUser(email: string, role: TestRole = "STUDENT"):
   return created;
 }
 
-/** Creates a signed-in browser context for `email`, bypassing the magic-link UI flow. */
+/** Creates a signed-in browser context for `email`, bypassing the sign-in UI flow. */
 export async function createAuthenticatedContext(
   browser: Browser,
   email: string,
