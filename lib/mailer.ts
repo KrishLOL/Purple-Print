@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import type { NodemailerConfig } from "next-auth/providers/nodemailer";
 import { getSiteUrl } from "@/lib/site";
+import { prisma } from "@/lib/db";
 
 type SendVerificationRequestParams = Parameters<NodemailerConfig["sendVerificationRequest"]>[0];
 
@@ -19,12 +20,16 @@ export async function sendMagicLinkEmail({
   // The email links to our own /auth/confirm page rather than straight to
   // Auth.js's callback URL, which is a single-use, sign-in-completing GET
   // request. Institutional email (uwo.ca runs on Microsoft 365) commonly
-  // auto-visits links in incoming mail for security scanning before the
-  // user ever opens the message, silently consuming that token. The
-  // confirm page is inert on its own GET — it only requires the user to
-  // click a real button, which scanners don't simulate — and that click is
-  // what actually hits the callback URL.
-  const confirmUrl = `${getSiteUrl()}/auth/confirm?url=${encodeURIComponent(url)}`;
+  // scans/rewrites links in incoming mail before the user ever opens the
+  // message, silently consuming that token.
+  //
+  // The real URL is stored server-side and referenced by an opaque id
+  // (NOT passed as a `?url=` query param) — several mail security
+  // scanners specifically detect and auto-follow redirect-shaped
+  // parameters like that as an anti-phishing measure, which would defeat
+  // this the same way a bare link did. See PendingMagicLink in the schema.
+  const pending = await prisma.pendingMagicLink.create({ data: { targetUrl: url } });
+  const confirmUrl = `${getSiteUrl()}/auth/confirm?id=${pending.id}`;
 
   if (process.env.NODE_ENV !== "production") {
     console.log(`\n[dev] Magic sign-in link for ${email}:\n${confirmUrl}\n`);

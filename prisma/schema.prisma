@@ -245,6 +245,19 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Holds the real (token-bearing) Auth.js callback URL behind an opaque id
+// while the user is on /auth/confirm. Deliberately not passed as a `?url=`
+// query param on that page: several institutional mail security scanners
+// (uwo.ca runs on Microsoft 365/Defender) specifically detect and
+// auto-follow redirect-shaped parameters like that as an anti-phishing
+// measure, which defeats the whole point of the confirm step. An opaque
+// id gives a scanner nothing to unwrap. See lib/mailer.ts.
+model PendingMagicLink {
+  id        String   @id @default(cuid())
+  targetUrl String
+  createdAt DateTime @default(now())
+}
+
 // ---------------------------------------------------------------------------
 // Reviews
 // ---------------------------------------------------------------------------

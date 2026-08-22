@@ -1,52 +1,41 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getSiteUrl } from "@/lib/site";
+import { prisma } from "@/lib/db";
 import { ConfirmSignInButton } from "@/components/auth/confirm-button";
 
 export const metadata: Metadata = { title: "Confirm sign-in" };
 
-/**
- * Only ever hands the confirm button a URL that's genuinely one of our
- * own Auth.js callback endpoints on our own origin — this page takes an
- * attacker-influenceable `url` search param (anyone can craft a link to
- * /auth/confirm?url=...), so without this check it would be an open
- * redirect: someone could mint a link that *looks* like a Purpleprint
- * sign-in confirmation but actually sends a clicking user somewhere else
- * entirely.
- */
-function getSafeCallbackUrl(raw: string | undefined): string | null {
-  if (!raw) return null;
-  let parsed: URL;
-  try {
-    parsed = new URL(raw);
-  } catch {
-    return null;
-  }
-  const site = new URL(getSiteUrl());
-  if (parsed.origin !== site.origin) return null;
-  if (!parsed.pathname.startsWith("/api/auth/callback/")) return null;
-  return parsed.toString();
+// Matches Auth.js's own default magic-link expiry (24h) — a
+// PendingMagicLink row older than this is treated as invalid rather than
+// left to accumulate indefinitely. The real security boundary is still
+// Auth.js's own VerificationToken expiry/single-use check; this is just
+// hygiene for the id -> URL lookup table.
+const MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+function isExpired(createdAt: Date): boolean {
+  return Date.now() - createdAt.getTime() > MAX_AGE_MS;
 }
 
 export default async function ConfirmSignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ url?: string }>;
+  searchParams: Promise<{ id?: string }>;
 }) {
-  const { url } = await searchParams;
-  const safeUrl = getSafeCallbackUrl(url);
+  const { id } = await searchParams;
+  const pending = id ? await prisma.pendingMagicLink.findUnique({ where: { id } }) : null;
+  const targetUrl = pending && !isExpired(pending.createdAt) ? pending.targetUrl : null;
 
   return (
     <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center px-4 py-16 text-center sm:px-8">
       <h1 className="text-2xl font-semibold">Confirm sign-in</h1>
-      {safeUrl ? (
+      {targetUrl ? (
         <>
           <p className="mt-2 text-sm text-text-muted">
             One more click to finish signing in — this extra step exists because some university
-            email systems automatically open links to scan them, which would otherwise use up
-            your one-time sign-in link before you get to it.
+            email systems automatically open or rewrite links to scan them, which would otherwise
+            use up your one-time sign-in link before you get to it.
           </p>
-          <ConfirmSignInButton url={safeUrl} />
+          <ConfirmSignInButton url={targetUrl} />
         </>
       ) : (
         <>
