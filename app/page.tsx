@@ -5,6 +5,13 @@ import { DisciplineTabs } from "@/components/home/discipline-tabs";
 import { HeroSearch } from "@/components/home/hero-search";
 import { CornerCard } from "@/components/ui/corner-card";
 
+// This page has no request-time APIs (no searchParams/cookies/etc.), so
+// Next would otherwise prerender it once at build time and bake in
+// whatever the database looked like at that moment -- stats, disciplines,
+// and reviews would then go stale until the next deploy. Force it to
+// render fresh on every request instead.
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const { stats, coreDisciplines, combinedDegreeDisciplines, topRated, recentlyReviewed } =
     await getLandingData();

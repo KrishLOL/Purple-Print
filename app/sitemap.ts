@@ -2,6 +2,13 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { getSiteUrl } from "@/lib/site";
 
+// Same staleness issue as the homepage (see app/page.tsx) -- this has no
+// request-time APIs, so without an explicit revalidate it would be baked
+// once at build time and never pick up newly added courses/professors.
+// A sitemap doesn't need per-request freshness, so revalidate periodically
+// via ISR instead of forcing fully dynamic rendering.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteUrl();
 
