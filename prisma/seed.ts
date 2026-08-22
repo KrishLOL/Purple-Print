@@ -37,10 +37,7 @@ const rand = mulberry32(42); // fixed seed: seed data is reproducible across `pn
  * Engineering are real concurrent/combined-degree programs — Western
  * students take them alongside one of Chemical/Civil/Electrical/
  * Mechanical/Mechatronics, with their own dedicated course codes (AISE,
- * BME) confirmed on the live calendar. HBA (the Ivey Business combined
- * degree) is a third real combined degree, but has no dedicated
- * engineering-side course codes of its own — see the static card in
- * components/home/discipline-tabs.tsx instead of a seeded Discipline row.
+ * BME) confirmed on the live calendar.
  */
 const DISCIPLINES = [
   {
