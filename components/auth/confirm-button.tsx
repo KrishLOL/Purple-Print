@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 /**
  * Deliberately NOT a plain <a href> — a first attempt at this page used
  * one, and the destination still got consumed before the user clicked
@@ -15,17 +17,27 @@
  * (window.location.href, not client-side routing) so redirects and
  * Set-Cookie from the Auth.js callback behave exactly like a normal link
  * click would.
+ *
+ * The underlying link is single-use, so a second click (impatience,
+ * double-click, browser back-then-forward) after the first already went
+ * through would otherwise land on the confusing "invalid or expired"
+ * error page even though sign-in already succeeded. Disable after the
+ * first click rather than let that happen.
  */
 export function ConfirmSignInButton({ url }: { url: string }) {
+  const [clicked, setClicked] = useState(false);
+
   return (
     <button
       type="button"
+      disabled={clicked}
       onClick={() => {
+        setClicked(true);
         window.location.href = url;
       }}
-      className="font-num mt-6 inline-flex items-center justify-center gap-2 bg-accent px-4 py-2.5 text-xs uppercase tracking-wider text-accent-contrast transition-colors hover:opacity-90"
+      className="font-num mt-6 inline-flex items-center justify-center gap-2 bg-accent px-4 py-2.5 text-xs uppercase tracking-wider text-accent-contrast transition-colors hover:opacity-90 disabled:opacity-50"
     >
-      Confirm sign-in
+      {clicked ? "Signing in…" : "Confirm sign-in"}
     </button>
   );
 }
