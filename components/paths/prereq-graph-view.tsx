@@ -119,6 +119,10 @@ export function PrereqGraphView({
         </span>
       </div>
 
+      <p className="font-num mb-3 flex items-center gap-2 text-xs uppercase tracking-wider text-text-muted">
+        Prerequisite <span aria-hidden>→</span> the course that needs it
+      </p>
+
       {nodes.length === 0 ? (
         <p className="border border-border bg-surface p-6 text-center text-sm text-text-muted">
           No courses found for this discipline.
@@ -132,6 +136,30 @@ export function PrereqGraphView({
               className="pointer-events-none absolute inset-0"
               aria-hidden
             >
+              <defs>
+                <marker
+                  id="prereq-arrow"
+                  viewBox="0 0 8 8"
+                  refX="7"
+                  refY="4"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto-start-reverse"
+                >
+                  <path d="M0 0 L8 4 L0 8 Z" fill="var(--border)" />
+                </marker>
+                <marker
+                  id="prereq-arrow-active"
+                  viewBox="0 0 8 8"
+                  refX="7"
+                  refY="4"
+                  markerWidth="6"
+                  markerHeight="6"
+                  orient="auto-start-reverse"
+                >
+                  <path d="M0 0 L8 4 L0 8 Z" fill="var(--accent)" />
+                </marker>
+              </defs>
               {edges.map((edge) => {
                 const from = layout.positions.get(edge.fromId);
                 const to = layout.positions.get(edge.toId);
@@ -151,6 +179,7 @@ export function PrereqGraphView({
                     stroke={highlighted ? "var(--accent)" : "var(--border)"}
                     strokeWidth={highlighted ? 2 : 1}
                     opacity={dimmed ? 0.25 : 1}
+                    markerEnd={`url(#${highlighted ? "prereq-arrow-active" : "prereq-arrow"})`}
                   />
                 );
               })}
