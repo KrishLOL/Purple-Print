@@ -110,12 +110,12 @@ export function PrereqGraphView({
           ))}
         </select>
         <span className="flex items-center gap-1.5 text-xs text-text-muted">
-          <span className="inline-block h-2.5 w-2.5 border border-border" aria-hidden />
-          in this discipline
+          <span className="inline-block h-3 w-6 border border-solid border-text-muted bg-bg" aria-hidden />
+          this discipline
         </span>
         <span className="flex items-center gap-1.5 text-xs text-text-muted">
-          <span className="inline-block h-2.5 w-2.5 border border-dashed border-border" aria-hidden />
-          prerequisite from another discipline
+          <span className="inline-block h-3 w-6 border border-dashed border-text-muted bg-bg" aria-hidden />
+          prerequisite from elsewhere
         </span>
       </div>
 
