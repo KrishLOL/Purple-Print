@@ -436,9 +436,20 @@ async function main() {
   await seedCourses();
   await seedProfessors();
   await linkCourseProfessors();
-  await seedUsers();
-  const { touchedCourseIds, touchedProfessorIds } = await seedReviews();
-  await recomputeAggregates(touchedCourseIds, touchedProfessorIds);
+
+  // Synthetic reviews are opt-in only. Local dev and production share one
+  // database (see README.md#database), so an ordinary `pnpm db:seed` run
+  // — e.g. after adding a new course — must never silently repopulate
+  // fake reviews onto a site that real students are using. Pass
+  // SEED_FAKE_REVIEWS=true explicitly if you actually want them (e.g. for
+  // local UI testing against a throwaway database).
+  if (process.env.SEED_FAKE_REVIEWS === "true") {
+    await seedUsers();
+    const { touchedCourseIds, touchedProfessorIds } = await seedReviews();
+    await recomputeAggregates(touchedCourseIds, touchedProfessorIds);
+  } else {
+    console.log("Skipping synthetic reviews (set SEED_FAKE_REVIEWS=true to include them).");
+  }
 }
 
 main()
