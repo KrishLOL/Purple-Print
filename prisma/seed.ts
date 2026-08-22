@@ -144,22 +144,21 @@ async function seedCourses() {
   const firstYear = await prisma.discipline.findUniqueOrThrow({ where: { slug: "first-year" } });
 
   for (const course of FIRST_YEAR_COURSES) {
+    const data = {
+      title: course.title,
+      description: course.description,
+      disciplineId: firstYear.id,
+      yearLevel: 1,
+      termsOffered: course.termsOffered,
+      isCore: true,
+      isFirstYearCommon: true,
+      antirequisites: course.antirequisites,
+      prerequisites: course.prerequisites,
+    };
     await prisma.course.upsert({
       where: { code: course.code },
-      update: {},
-      create: {
-        code: course.code,
-        title: course.title,
-        description: course.description,
-        disciplineId: firstYear.id,
-        yearLevel: 1,
-        termsOffered: course.termsOffered,
-        isCore: true,
-        isFirstYearCommon: true,
-        antirequisites: "None",
-        prerequisites: "Admission to a Western Engineering program.",
-        isSeedData: true,
-      },
+      update: data,
+      create: { code: course.code, isSeedData: true, ...data },
     });
   }
 
@@ -167,22 +166,21 @@ async function seedCourses() {
   for (const [slug, courses] of Object.entries(UPPER_YEAR_COURSES)) {
     const discipline = await prisma.discipline.findUniqueOrThrow({ where: { slug } });
     for (const course of courses) {
+      const data = {
+        title: course.title,
+        description: course.description,
+        disciplineId: discipline.id,
+        yearLevel: course.yearLevel,
+        termsOffered: course.termsOffered,
+        isCore: course.isCore,
+        isFirstYearCommon: false,
+        antirequisites: course.antirequisites,
+        prerequisites: course.prerequisites,
+      };
       await prisma.course.upsert({
         where: { code: course.code },
-        update: {},
-        create: {
-          code: course.code,
-          title: course.title,
-          description: course.description,
-          disciplineId: discipline.id,
-          yearLevel: course.yearLevel,
-          termsOffered: course.termsOffered,
-          isCore: course.isCore,
-          isFirstYearCommon: false,
-          antirequisites: "None",
-          prerequisites: "See the Academic Calendar for program-specific prerequisites.",
-          isSeedData: true,
-        },
+        update: data,
+        create: { code: course.code, isSeedData: true, ...data },
       });
       upperYearCount++;
     }
