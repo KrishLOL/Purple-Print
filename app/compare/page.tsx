@@ -17,9 +17,17 @@ export default async function ComparePage({ searchParams }: PageProps<"/compare"
 
   const options =
     params.type === "courses"
-      ? (await prisma.course.findMany({ select: { id: true, code: true, title: true }, orderBy: { code: "asc" } })).map(
-          (c) => ({ id: c.id, label: c.code, sublabel: c.title }),
-        )
+      ? (
+          await prisma.course.findMany({
+            select: { id: true, code: true, title: true, discipline: { select: { name: true } } },
+            orderBy: { code: "asc" },
+          })
+        ).map((c) => ({
+          id: c.id,
+          label: c.code,
+          sublabel: c.title,
+          groupLabel: c.discipline?.name ?? "Other",
+        }))
       : (
           await prisma.professor.findMany({
             select: { id: true, firstName: true, lastName: true, title: true },
