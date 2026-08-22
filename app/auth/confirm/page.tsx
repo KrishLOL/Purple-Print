@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteUrl } from "@/lib/site";
+import { ConfirmSignInButton } from "@/components/auth/confirm-button";
 
 export const metadata: Metadata = { title: "Confirm sign-in" };
 
 /**
- * Only ever renders a link to a URL that's genuinely one of our own
- * Auth.js callback endpoints on our own origin — this page takes an
+ * Only ever hands the confirm button a URL that's genuinely one of our
+ * own Auth.js callback endpoints on our own origin — this page takes an
  * attacker-influenceable `url` search param (anyone can craft a link to
  * /auth/confirm?url=...), so without this check it would be an open
  * redirect: someone could mint a link that *looks* like a Purpleprint
@@ -45,12 +46,7 @@ export default async function ConfirmSignInPage({
             email systems automatically open links to scan them, which would otherwise use up
             your one-time sign-in link before you get to it.
           </p>
-          <a
-            href={safeUrl}
-            className="font-num mt-6 inline-flex items-center justify-center gap-2 bg-accent px-4 py-2.5 text-xs uppercase tracking-wider text-accent-contrast transition-colors hover:opacity-90"
-          >
-            Confirm sign-in
-          </a>
+          <ConfirmSignInButton url={safeUrl} />
         </>
       ) : (
         <>
