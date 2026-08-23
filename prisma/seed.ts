@@ -5,10 +5,10 @@ import { recomputeCourseAggregates, recomputeProfessorAggregates } from "../lib/
 import { hashEmail } from "../lib/anonymize";
 import { FIRST_YEAR_COURSES } from "./seed-data/first-year-courses";
 import { UPPER_YEAR_COURSES } from "./seed-data/upper-year-courses";
+import { REAL_PROFESSORS } from "./seed-data/professors";
 import {
   FIRST_NAMES,
   LAST_NAMES,
-  TITLES,
   composeReviewBody,
   mulberry32,
   pick,
@@ -215,67 +215,69 @@ async function seedCourses() {
 
 async function seedProfessors() {
   const disciplines = await prisma.discipline.findMany();
-  const usedNames = new Set<string>();
-  const professorCount = 40;
+  const disciplineIdBySlug = new Map(disciplines.map((d) => [d.slug, d.id]));
 
-  for (let i = 0; i < professorCount; i++) {
-    let firstName: string;
-    let lastName: string;
-    let nameKey: string;
-    do {
-      firstName = pick(FIRST_NAMES, rand);
-      lastName = pick(LAST_NAMES, rand);
-      nameKey = `${firstName}-${lastName}`;
-    } while (usedNames.has(nameKey));
-    usedNames.add(nameKey);
+  // Prune any professor no longer in REAL_PROFESSORS -- covers both the
+  // original 40 synthetic placeholder professors (see git history) and any
+  // future removal from the list itself. Cascades to CourseProfessor.
+  const keepSlugs = REAL_PROFESSORS.map((p) => p.slug);
+  const { count: pruned } = await prisma.professor.deleteMany({
+    where: { isSeedData: true, slug: { notIn: keepSlugs } },
+  });
 
-    const discipline = disciplines[i % disciplines.length];
-    const slug = `${nameKey.toLowerCase()}`;
-
+  for (const p of REAL_PROFESSORS) {
     await prisma.professor.upsert({
-      where: { slug },
-      update: {},
+      where: { slug: p.slug },
+      update: {
+        firstName: p.firstName,
+        lastName: p.lastName,
+        disciplineId: p.disciplineSlug ? (disciplineIdBySlug.get(p.disciplineSlug) ?? null) : null,
+      },
       create: {
-        firstName,
-        lastName,
-        slug,
-        title: pick(TITLES, rand),
+        firstName: p.firstName,
+        lastName: p.lastName,
+        slug: p.slug,
+        title: "Professor",
         profileUrl: null,
-        disciplineId: discipline.id,
+        disciplineId: p.disciplineSlug ? (disciplineIdBySlug.get(p.disciplineSlug) ?? null) : null,
         isSeedData: true,
       },
     });
   }
 
-  console.log(`Seeded ${professorCount} professors.`);
+  console.log(`Seeded ${REAL_PROFESSORS.length} professors (pruned ${pruned} no-longer-listed).`);
 }
 
 async function linkCourseProfessors() {
   const courses = await prisma.course.findMany({ where: { isSeedData: true } });
+  const courseIdByCode = new Map(courses.map((c) => [c.code, c.id]));
   const professors = await prisma.professor.findMany({ where: { isSeedData: true } });
-  const terms = ["Fall 2024", "Winter 2025", "Fall 2025", "Winter 2026"];
+  const professorIdBySlug = new Map(professors.map((p) => [p.slug, p.id]));
 
   let links = 0;
-  for (const course of courses) {
-    const pool = professors.filter((p) => p.disciplineId === course.disciplineId);
-    if (pool.length === 0) continue;
+  let unmatchedCodes = 0;
+  for (const p of REAL_PROFESSORS) {
+    const professorId = professorIdBySlug.get(p.slug);
+    if (!professorId) continue;
 
-    const teachCount = Math.min(pool.length, randomInt(1, 2));
-    const chosen = new Set<string>();
-    while (chosen.size < teachCount) {
-      chosen.add(pick(pool, rand).id);
-    }
-
-    for (const professorId of chosen) {
+    for (const code of p.courseCodes) {
+      const courseId = courseIdByCode.get(code);
+      if (!courseId) {
+        unmatchedCodes++;
+        continue;
+      }
       await prisma.courseProfessor.upsert({
-        where: { courseId_professorId: { courseId: course.id, professorId } },
+        where: { courseId_professorId: { courseId, professorId } },
         update: {},
-        create: { courseId: course.id, professorId, lastTaughtTerm: pick(terms, rand) },
+        create: { courseId, professorId, lastTaughtTerm: null },
       });
       links++;
     }
   }
 
+  if (unmatchedCodes > 0) {
+    console.warn(`${unmatchedCodes} professor course codes didn't match any seeded course.`);
+  }
   console.log(`Linked ${links} course-professor pairs.`);
 }
 
