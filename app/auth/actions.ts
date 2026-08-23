@@ -42,17 +42,26 @@ export async function signInWithEmail(formData: FormData) {
   // on the intermediate /api/auth/verify-request URL rather than reaching
   // /auth/verify-code). Redirecting to our own page directly sidesteps
   // that entirely.
+  let result: string | undefined;
   try {
-    await signIn("nodemailer", { email, redirect: false });
+    result = await signIn("nodemailer", { email, redirect: false });
   } catch (err) {
-    // Only an AuthError here means something genuinely went wrong (e.g.
-    // our own per-IP rate limit, or the uwo.ca domain rejection from
-    // auth.ts) — signIn() only throws in the redirect:false form when
-    // there's a real error, since it's not doing its own redirect.
+    // An AuthError here means our own per-IP rate limit rejected the
+    // request before Auth.js's own signIn callback ever ran.
     if (err instanceof AuthError) {
       redirect(`/auth/error?reason=send-failed`);
     }
     throw err;
+  }
+
+  // signIn() with redirect:false does NOT throw when the `signIn`
+  // callback in auth.ts rejects (non-uwo.ca domain, banned user) — Auth.js
+  // treats a string return from that callback as "redirect here instead"
+  // and hands the URL back as a normal return value, never sending a code.
+  // Ignoring that return value would let a rejected email silently land on
+  // the "we sent you a code" screen despite no code ever being sent.
+  if (result?.includes("/auth/error")) {
+    redirect(result);
   }
 
   redirect("/auth/verify-code");
