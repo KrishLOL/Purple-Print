@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s — Purpleprint",
   },
   description:
-    "Course and professor reviews for Western University's Faculty of Engineering, written by students.",
+    "Real course and professor reviews for Western University's Faculty of Engineering, from the students who took them.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -26,8 +26,8 @@ export default async function Home() {
           Know before you register.
         </h1>
         <p className="mx-auto mt-4 max-w-md text-sm text-text-muted">
-          Course and professor reviews written by Western Engineering students, for Western
-          Engineering students.
+          Real reviews of Western Engineering courses and professors, from the students who
+          actually took them.
         </p>
         <div className="mt-8">
           <HeroSearch />
