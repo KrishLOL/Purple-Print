@@ -35,19 +35,19 @@ export default async function Home() {
 
         <dl className="font-num mt-10 flex flex-wrap justify-center gap-x-10 gap-y-4 text-sm">
           <div>
-            <dt className="text-xs uppercase tracking-wider text-text-muted">Courses</dt>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Courses indexed</dt>
             <dd className="text-2xl font-semibold">
               <AnimatedNumber value={stats.courseCount} />
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wider text-text-muted">Professors</dt>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Faculty tracked</dt>
             <dd className="text-2xl font-semibold">
               <AnimatedNumber value={stats.professorCount} />
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wider text-text-muted">Reviews</dt>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Student reports</dt>
             <dd className="text-2xl font-semibold">
               <AnimatedNumber value={stats.reviewCount} />
             </dd>
