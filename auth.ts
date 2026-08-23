@@ -8,7 +8,11 @@ import { isRateLimited } from "@/lib/rate-limit";
 import { emailDomain, hashEmail } from "@/lib/anonymize";
 
 const UWO_DOMAIN = "uwo.ca";
-const CODE_SEND_MAX_PER_IP = 5;
+// Real limit in production; loosened outside it so repeatedly running the
+// e2e suite locally (many sign-ins from one dev-server IP) doesn't trip a
+// limit that's now enforced in Postgres and, unlike the old in-memory
+// version, survives a dev-server restart -- see lib/rate-limit.ts.
+const CODE_SEND_MAX_PER_IP = process.env.NODE_ENV === "production" ? 5 : 500;
 const CODE_SEND_WINDOW_MS = 15 * 60 * 1000;
 
 function isUwoEmail(email: string | null | undefined): email is string {
@@ -62,7 +66,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       server: process.env.AUTH_EMAIL_SERVER,
       async sendVerificationRequest(params) {
         const ip = params.request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-        if (isRateLimited(`code-send:${ip}`, CODE_SEND_MAX_PER_IP, CODE_SEND_WINDOW_MS)) {
+        if (await isRateLimited(`code-send:${ip}`, CODE_SEND_MAX_PER_IP, CODE_SEND_WINDOW_MS)) {
           throw new Error("Too many sign-in requests from this network. Try again in a few minutes.");
         }
         await sendSignInCodeEmail(params);

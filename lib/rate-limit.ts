@@ -1,23 +1,37 @@
-const buckets = new Map<string, number[]>();
+import { prisma } from "@/lib/db";
 
 /**
- * Simple in-memory sliding-window rate limiter. Good enough for a single
- * dev/small-deployment process; a real multi-instance production deploy
- * should swap this for a shared store (e.g. Upstash Redis), since each
- * server process would otherwise track its own counts independently.
+ * Fixed-window rate limiter backed by the shared Postgres database rather
+ * than in-process memory -- a serverless deploy runs many isolated function
+ * instances, so an in-memory counter would track each instance separately
+ * and under-enforce the limit. The upsert below is a single atomic
+ * statement (INSERT ... ON CONFLICT), so concurrent requests for the same
+ * key across different instances still count correctly against one shared
+ * total.
  *
- * Returns true if `key` has already made `maxRequests` within `windowMs`.
+ * Returns true if `key` has already made `maxRequests` within the current
+ * `windowMs`-wide window.
  */
-export function isRateLimited(key: string, maxRequests: number, windowMs: number): boolean {
-  const now = Date.now();
-  const timestamps = (buckets.get(key) ?? []).filter((t) => now - t < windowMs);
+export async function isRateLimited(key: string, maxRequests: number, windowMs: number): Promise<boolean> {
+  const windowStart = new Date(Math.floor(Date.now() / windowMs) * windowMs);
 
-  if (timestamps.length >= maxRequests) {
-    buckets.set(key, timestamps);
-    return true;
+  const rows = await prisma.$queryRaw<{ count: number }[]>`
+    INSERT INTO "RateLimitBucket" AS b (key, "windowStart", count)
+    VALUES (${key}, ${windowStart}, 1)
+    ON CONFLICT (key) DO UPDATE SET
+      count = CASE WHEN b."windowStart" = EXCLUDED."windowStart" THEN b.count + 1 ELSE 1 END,
+      "windowStart" = EXCLUDED."windowStart"
+    RETURNING count
+  `;
+
+  // Opportunistic cleanup so the table doesn't grow unbounded with one row
+  // per distinct key ever seen -- no separate cron needed for a table this
+  // cheap to sweep. Never blocks the rate-limit decision itself.
+  if (Math.random() < 0.01) {
+    const staleCutoff = new Date(Date.now() - Math.max(windowMs, 60 * 60 * 1000));
+    prisma.rateLimitBucket.deleteMany({ where: { windowStart: { lt: staleCutoff } } }).catch(() => {});
   }
 
-  timestamps.push(now);
-  buckets.set(key, timestamps);
-  return false;
+  const count = rows[0]?.count ?? 1;
+  return count > maxRequests;
 }

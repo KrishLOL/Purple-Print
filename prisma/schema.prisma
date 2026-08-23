@@ -280,6 +280,20 @@ model SignInCode {
   @@index([email])
 }
 
+// Shared rate-limit counters. A serverless deploy runs many isolated
+// function instances with no shared memory, so an in-memory Map (the
+// original implementation) tracks each instance's own counts independently
+// and under-enforces limits in production. One row per rate-limit key
+// (e.g. "code-send:1.2.3.4"), reset each time its fixed window rolls over.
+// See lib/rate-limit.ts.
+model RateLimitBucket {
+  key         String   @id
+  windowStart DateTime
+  count       Int      @default(1)
+
+  @@index([windowStart])
+}
+
 // ---------------------------------------------------------------------------
 // Reviews
 // ---------------------------------------------------------------------------

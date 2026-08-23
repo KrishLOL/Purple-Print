@@ -12,7 +12,9 @@ import { isRateLimited } from "@/lib/rate-limit";
 const PENDING_EMAIL_COOKIE = "pending-signin-email";
 const PENDING_EMAIL_COOKIE_MAX_AGE = 15 * 60; // seconds, matches the code's own expiry
 const MAX_CODE_ATTEMPTS = 5;
-const CODE_GUESS_MAX_PER_IP = 20;
+// See the matching comment in auth.ts (CODE_SEND_MAX_PER_IP) for why this
+// is loosened outside production.
+const CODE_GUESS_MAX_PER_IP = process.env.NODE_ENV === "production" ? 20 : 2000;
 const CODE_GUESS_WINDOW_MS = 15 * 60 * 1000;
 
 function hashCode(code: string, email: string): string {
@@ -78,7 +80,7 @@ export async function verifySignInCode(formData: FormData): Promise<VerifyCodeRe
   }
 
   const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
-  if (isRateLimited(`code-guess:${ip}`, CODE_GUESS_MAX_PER_IP, CODE_GUESS_WINDOW_MS)) {
+  if (await isRateLimited(`code-guess:${ip}`, CODE_GUESS_MAX_PER_IP, CODE_GUESS_WINDOW_MS)) {
     return { ok: false, error: "Too many attempts from this network. Try again in a few minutes." };
   }
 
