@@ -7,7 +7,7 @@ import { isWithinEditWindow } from "@/lib/ratings";
 import { Button } from "@/components/ui/button";
 import { DeleteReviewButton } from "@/components/me/delete-review-button";
 import { UnsaveCourseButton } from "@/components/me/unsave-course-button";
-import { updateMyProfile } from "./actions";
+import { ProfileForm } from "@/components/me/profile-form";
 
 export const metadata: Metadata = { title: "My account" };
 
@@ -51,42 +51,11 @@ export default async function MePage() {
 
       <section className="border-b border-border py-8">
         <h2 className="mb-4 text-xs uppercase tracking-wider text-text-muted">Profile</h2>
-        <form action={updateMyProfile} className="flex flex-wrap items-end gap-4">
-          <div>
-            <label htmlFor="disciplineId" className="mb-1.5 block text-xs uppercase tracking-wider text-text-muted">
-              Discipline
-            </label>
-            <select
-              id="disciplineId"
-              name="disciplineId"
-              defaultValue={user.disciplineId ?? ""}
-              className="border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
-            >
-              <option value="">Prefer not to say</option>
-              {disciplines.map((d) => (
-                <option key={d.id} value={d.id}>
-                  {d.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="gradYear" className="mb-1.5 block text-xs uppercase tracking-wider text-text-muted">
-              Grad year
-            </label>
-            <input
-              id="gradYear"
-              name="gradYear"
-              type="number"
-              defaultValue={user.gradYear ?? ""}
-              placeholder="2027"
-              className="w-28 border border-border bg-surface px-3 py-2 text-sm text-text focus:border-accent focus:outline-none"
-            />
-          </div>
-          <Button type="submit" variant="secondary">
-            Save
-          </Button>
-        </form>
+        <ProfileForm
+          disciplines={disciplines}
+          currentDisciplineId={user.disciplineId}
+          currentGradYear={user.gradYear}
+        />
       </section>
 
       <section className="border-b border-border py-8">
