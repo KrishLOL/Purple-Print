@@ -67,14 +67,6 @@ export default function TermsPage() {
           means you accept the update.
         </p>
       </section>
-
-      <section className="mt-8 border-t border-border pt-6 text-sm text-text-muted">
-        Questions? Email{" "}
-        <a href="mailto:contact@purpleprint.app" className="text-accent underline underline-offset-4">
-          contact@purpleprint.app
-        </a>
-        .
-      </section>
     </main>
   );
 }

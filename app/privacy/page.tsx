@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy",
-  description: "What Purpleprint collects, why, and how to get your data removed.",
+  description: "What Purpleprint collects and why.",
 };
 
 export default function PrivacyPage() {
@@ -49,13 +49,6 @@ export default function PrivacyPage() {
         <ul className="list-inside list-disc space-y-2 text-sm text-text">
           <li>Change or clear your discipline/grad year any time from account settings.</li>
           <li>Delete any review you&rsquo;ve written from account settings, any time.</li>
-          <li>
-            To delete your account entirely — email, hash, and all reviews — email{" "}
-            <a href="mailto:contact@purpleprint.app" className="text-accent underline underline-offset-4">
-              contact@purpleprint.app
-            </a>{" "}
-            from the address on the account and we&rsquo;ll remove it.
-          </li>
         </ul>
       </section>
 
