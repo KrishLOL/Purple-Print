@@ -41,7 +41,7 @@ export default async function Home() {
             </dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-wider text-text-muted">Faculty tracked</dt>
+            <dt className="text-xs uppercase tracking-wider text-text-muted">Professors tracked</dt>
             <dd className="text-2xl font-semibold">
               <AnimatedNumber value={stats.professorCount} />
             </dd>
