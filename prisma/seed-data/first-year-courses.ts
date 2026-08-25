@@ -66,7 +66,10 @@ export const FIRST_YEAR_COURSES: Array<{
     code: "ES 1022Y",
     title: "Engineering Statics",
     description: "Forces, moments, and equilibrium in structures and machines — the foundation for every mechanics course after it.",
-    termsOffered: ["FALL", "WINTER"],
+    // Also runs as a compressed section in Summer (confirmed on Western's
+    // official Summer Academic Timetable as ENGSCI 1022A) alongside its
+    // normal Fall/Winter offering.
+    termsOffered: ["FALL", "WINTER", "SUMMER"],
     prerequisites: "None.",
     antirequisites: "None.",
   },

@@ -124,7 +124,9 @@ export const UPPER_YEAR_COURSES: Record<string, UpperYearCourse[]> = {
   ],
   mechanical: [
     { code: "MME 2202A/B", title: "Mechanics of Materials", description: "Stress, strain, Mohr's circle, torsion, and beam bending.", yearLevel: 2, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Engineering Science 1022A/B/Y; NMM 1412A/B.", antirequisites: "CEE 2202A/B; the former MSE 2212A/B." },
-    { code: "MME 2204A/B", title: "Thermodynamics I", description: "The first and second laws, ideal gases, and energy conversion systems.", yearLevel: 2, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "NMM 1414A/B.", antirequisites: "CBE 2214A/B; the former MSE 2214A/B." },
+    // Also runs in Summer (confirmed on Western's official Summer Academic
+    // Timetable as MME 2204A) alongside its normal Fall/Winter offering.
+    { code: "MME 2204A/B", title: "Thermodynamics I", description: "The first and second laws, ideal gases, and energy conversion systems.", yearLevel: 2, termsOffered: ["FALL", "WINTER", "SUMMER"], isCore: true, prerequisites: "NMM 1414A/B.", antirequisites: "CBE 2214A/B; the former MSE 2214A/B." },
     { code: "MME 2213A/B", title: "Engineering Dynamics", description: "Rectilinear, angular, and curvilinear motion for particles and rigid bodies.", yearLevel: 2, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Engineering Science 1022A/B/Y.", antirequisites: "MSE 2213A/B." },
     { code: "MME 2259A/B", title: "Product Design & Development", description: "The mechanical design process, DFMA, and concept generation.", yearLevel: 2, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "Engineering Science 1021A/B; Engineering Science 1022A/B/Y; Engineering Science 1050.", antirequisites: "None." },
     { code: "MME 3303A/B", title: "Fluid Mechanics II", description: "Rigid-body motion, control volume analysis, and centrifugal pumps.", yearLevel: 3, termsOffered: ["FALL", "WINTER"], isCore: true, prerequisites: "MME 2273A/B.", antirequisites: "None." },
