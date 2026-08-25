@@ -231,13 +231,14 @@ async function seedProfessors() {
       update: {
         firstName: p.firstName,
         lastName: p.lastName,
+        title: p.title,
         disciplineId: p.disciplineSlug ? (disciplineIdBySlug.get(p.disciplineSlug) ?? null) : null,
       },
       create: {
         firstName: p.firstName,
         lastName: p.lastName,
         slug: p.slug,
-        title: "Professor",
+        title: p.title,
         profileUrl: null,
         disciplineId: p.disciplineSlug ? (disciplineIdBySlug.get(p.disciplineSlug) ?? null) : null,
         isSeedData: true,
