@@ -85,6 +85,12 @@ export default async function CoursePage({
           </span>
         </div>
         <p className="mt-4 max-w-prose text-sm text-text-muted">{course.description}</p>
+        {course.summerEquivalentNote && (
+          <p className="mt-3 max-w-prose border-l-2 border-accent/50 pl-3 text-xs text-text-muted">
+            <span className="font-medium text-text">Summer option: </span>
+            {course.summerEquivalentNote}
+          </p>
+        )}
       </header>
 
       <section className="flex flex-wrap justify-center gap-8 border-b border-border py-8">

@@ -13,6 +13,7 @@ export const FIRST_YEAR_COURSES: Array<{
   termsOffered: Term[];
   prerequisites: string;
   antirequisites: string;
+  summerEquivalentNote?: string;
 }> = [
   {
     code: "NMM 1411A/B",
@@ -21,6 +22,11 @@ export const FIRST_YEAR_COURSES: Array<{
     termsOffered: ["FALL", "WINTER"],
     prerequisites: "Ontario Secondary School MHF4U or MCV4U, or Mathematics 0110A/B.",
     antirequisites: "Mathematics 1600A/B; the former Applied Mathematics 1411A/B.",
+    // Confirmed on Western's Summer Academic Timetable: no NMM section runs
+    // in Summer, but Mathematics 1600A/B -- its own listed antirequisite,
+    // i.e. the calendar already treats it as covering the same material --
+    // does (as MATH 1600A).
+    summerEquivalentNote: "Not offered directly in Summer, but Mathematics 1600A/B (Linear Algebra I) — its own listed antirequisite — runs then and is accepted as equivalent.",
   },
   {
     code: "NMM 1412A",
@@ -29,14 +35,21 @@ export const FIRST_YEAR_COURSES: Array<{
     termsOffered: ["FALL"],
     prerequisites: "Ontario Secondary School MCV4U or equivalent, or Mathematics 0110A/B.",
     antirequisites: "Calculus 1000A/B; Calculus 1500A/B; Mathematics 1225A/B; Mathematics 1230A/B.",
+    // Same reasoning as NMM 1411A/B -- Calculus 1000A/B and Mathematics
+    // 1225A/B, both listed antirequisites, are confirmed running in Summer
+    // (as CALCULUS 1000A and MATH 1225A).
+    summerEquivalentNote: "Not offered directly in Summer, but Calculus 1000A/B or Mathematics 1225A/B — both listed antirequisites — run then and are accepted as equivalents.",
   },
   {
     code: "NMM 1414B",
     title: "Calculus for Engineers II",
     description: "Multivariable calculus, sequences and series, and differential equations for engineering problems.",
-    termsOffered: ["WINTER"],
+    // Also runs as NMM 1414A in Summer -- the same course under a different
+    // session letter, confirmed on Western's Summer Academic Timetable.
+    termsOffered: ["WINTER", "SUMMER"],
     prerequisites: "NMM 1412A/B, Calculus 1000A/B, Calculus 1500A/B, or the former Applied Mathematics 1412A/B.",
     antirequisites: "Calculus 1301A/B; Calculus 1501A/B; the former Applied Mathematics 1413; the former Applied Mathematics 1414A/B.",
+    summerEquivalentNote: "Calculus 1301A/B and Calculus 1501A/B — both listed antirequisites — also run in Summer, if NMM 1414A doesn't fit your schedule.",
   },
   {
     code: "BUS 1299E",

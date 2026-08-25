@@ -178,6 +178,7 @@ async function seedCourses() {
       isFirstYearCommon: true,
       antirequisites: course.antirequisites,
       prerequisites: course.prerequisites,
+      summerEquivalentNote: course.summerEquivalentNote ?? null,
     };
     await prisma.course.upsert({
       where: { code: course.code },
