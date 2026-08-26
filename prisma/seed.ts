@@ -5,6 +5,7 @@ import { recomputeCourseAggregates, recomputeProfessorAggregates } from "../lib/
 import { hashEmail } from "../lib/anonymize";
 import { FIRST_YEAR_COURSES } from "./seed-data/first-year-courses";
 import { UPPER_YEAR_COURSES } from "./seed-data/upper-year-courses";
+import { SHARED_COURSES } from "./seed-data/shared-courses";
 import { REAL_PROFESSORS } from "./seed-data/professors";
 import {
   FIRST_NAMES,
@@ -211,7 +212,28 @@ async function seedCourses() {
     }
   }
 
-  console.log(`Seeded ${FIRST_YEAR_COURSES.length} first-year + ${upperYearCount} upper-year courses.`);
+  for (const course of SHARED_COURSES) {
+    const data = {
+      title: course.title,
+      description: course.description,
+      disciplineId: null,
+      yearLevel: course.yearLevel,
+      termsOffered: course.termsOffered,
+      isCore: course.isCore,
+      isFirstYearCommon: false,
+      antirequisites: course.antirequisites,
+      prerequisites: course.prerequisites,
+    };
+    await prisma.course.upsert({
+      where: { code: course.code },
+      update: data,
+      create: { code: course.code, isSeedData: true, ...data },
+    });
+  }
+
+  console.log(
+    `Seeded ${FIRST_YEAR_COURSES.length} first-year + ${upperYearCount} upper-year + ${SHARED_COURSES.length} shared courses.`,
+  );
 }
 
 async function seedProfessors() {
