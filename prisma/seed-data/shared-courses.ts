@@ -99,4 +99,14 @@ export const SHARED_COURSES: UpperYearCourse[] = [
     prerequisites: "Completion of third year of any Engineering program, or registration in Year 3 Integrated Engineering.",
     antirequisites: "The former Engineering Science 4498F/G.",
   },
+  {
+    code: "DS 3000A/B",
+    title: "Introduction to Machine Learning",
+    description: "Estimation, optimization, prediction, generalization, and regularization, across supervised (linear models, decision trees, neural networks) and unsupervised (clustering, dimensionality reduction) learning.",
+    yearLevel: 3,
+    termsOffered: ["FALL", "WINTER"] as Term[],
+    isCore: true,
+    prerequisites: "Completion of second year of the AISE or Software Engineering program, or permission of the department.",
+    antirequisites: "The former Computer Science 4414A/B; the former Statistical Sciences 3850F/G; the former SE 4460A/B.",
+  },
 ];
