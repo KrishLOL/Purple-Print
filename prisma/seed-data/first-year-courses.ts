@@ -20,25 +20,25 @@ export const FIRST_YEAR_COURSES: Array<{
     title: "Linear Algebra with Numerical Analysis for Engineers",
     description: "Vectors, matrices, and linear systems, with an introduction to the numerical methods engineers use to solve them.",
     termsOffered: ["FALL", "WINTER"],
-    prerequisites: "Ontario Secondary School MHF4U or MCV4U, or Mathematics 0110A/B.",
-    antirequisites: "Mathematics 1600A/B; the former Applied Mathematics 1411A/B.",
+    prerequisites: "Ontario Secondary School MHF4U or MCV4U, or MATH 0110A/B.",
+    antirequisites: "MATH 1600A/B; the former Applied MATH 1411A/B.",
     // Confirmed on Western's Summer Academic Timetable: no NMM section runs
-    // in Summer, but Mathematics 1600A/B -- its own listed antirequisite,
+    // in Summer, but MATH 1600A/B -- its own listed antirequisite,
     // i.e. the calendar already treats it as covering the same material --
     // does (as MATH 1600A).
-    summerEquivalentNote: "Not offered directly in Summer, but Mathematics 1600A/B (Linear Algebra I) — its own listed antirequisite — runs then and is accepted as equivalent.",
+    summerEquivalentNote: "Not offered directly in Summer, but MATH 1600A/B (Linear Algebra I) — its own listed antirequisite — runs then and is accepted as equivalent.",
   },
   {
     code: "NMM 1412A",
     title: "Calculus for Engineers I",
     description: "Differential and integral calculus of one variable, built around engineering applications.",
     termsOffered: ["FALL"],
-    prerequisites: "Ontario Secondary School MCV4U or equivalent, or Mathematics 0110A/B.",
-    antirequisites: "Calculus 1000A/B; Calculus 1500A/B; Mathematics 1225A/B; Mathematics 1230A/B.",
+    prerequisites: "Ontario Secondary School MCV4U or equivalent, or MATH 0110A/B.",
+    antirequisites: "Calculus 1000A/B; Calculus 1500A/B; MATH 1225A/B; MATH 1230A/B.",
     // Same reasoning as NMM 1411A/B -- Calculus 1000A/B and Mathematics
     // 1225A/B, both listed antirequisites, are confirmed running in Summer
     // (as CALCULUS 1000A and MATH 1225A).
-    summerEquivalentNote: "Not offered directly in Summer, but Calculus 1000A/B or Mathematics 1225A/B — both listed antirequisites — run then and are accepted as equivalents.",
+    summerEquivalentNote: "Not offered directly in Summer, but Calculus 1000A/B or MATH 1225A/B — both listed antirequisites — run then and are accepted as equivalents.",
   },
   {
     code: "NMM 1414B",
@@ -47,8 +47,8 @@ export const FIRST_YEAR_COURSES: Array<{
     // Also runs as NMM 1414A in Summer -- the same course under a different
     // session letter, confirmed on Western's Summer Academic Timetable.
     termsOffered: ["WINTER", "SUMMER"],
-    prerequisites: "NMM 1412A/B, Calculus 1000A/B, Calculus 1500A/B, or the former Applied Mathematics 1412A/B.",
-    antirequisites: "Calculus 1301A/B; Calculus 1501A/B; the former Applied Mathematics 1413; the former Applied Mathematics 1414A/B.",
+    prerequisites: "NMM 1412A/B, Calculus 1000A/B, Calculus 1500A/B, or the former Applied MATH 1412A/B.",
+    antirequisites: "Calculus 1301A/B; Calculus 1501A/B; the former Applied MATH 1413; the former Applied MATH 1414A/B.",
     summerEquivalentNote: "Calculus 1301A/B and Calculus 1501A/B — both listed antirequisites — also run in Summer, if NMM 1414A doesn't fit your schedule.",
   },
   {
@@ -64,8 +64,8 @@ export const FIRST_YEAR_COURSES: Array<{
     title: "Chemistry for Engineers",
     description: "General chemistry — reactions, materials, and thermodynamics — framed around engineering practice.",
     termsOffered: ["FALL", "WINTER"],
-    prerequisites: "Grade 12U Chemistry (SCH4U) or equivalent. Grade 12U Advanced Functions (MHF4U) or Calculus & Vectors (MCV4U), or Mathematics 0110A/B or 0105A/B, is strongly recommended.",
-    antirequisites: "Ontario High School SCH4U or equivalent; Chemistry 0010; any university-level Chemistry course.",
+    prerequisites: "Grade 12U Chemistry (SCH4U) or equivalent. Grade 12U Advanced Functions (MHF4U) or Calculus & Vectors (MCV4U), or MATH 0110A/B or 0105A/B, is strongly recommended.",
+    antirequisites: "Ontario High School SCH4U or equivalent; CHEM 0010; any university-level Chemistry course.",
   },
   {
     code: "ES 1021A/B",
@@ -92,7 +92,7 @@ export const FIRST_YEAR_COURSES: Array<{
     description: "An intro to programming and problem-solving for engineers, with no assumed prior coding experience.",
     termsOffered: ["FALL", "WINTER"],
     prerequisites: "None.",
-    antirequisites: "Computer Science 1025A/B; Computer Science 1026A/B.",
+    antirequisites: "CS 1025A/B; CS 1026A/B.",
   },
   {
     code: "ES 1050",
@@ -107,15 +107,15 @@ export const FIRST_YEAR_COURSES: Array<{
     title: "Physics for Engineering Students I",
     description: "Mechanics and waves, taught with the calculus and problem-solving habits engineering builds on later.",
     termsOffered: ["FALL", "WINTER"],
-    prerequisites: "Grade 12U Calculus and Vectors (MCV4U) or Mathematics 0110A/B; Grade 12U Physics (SPH4U). Corequisite: NMM 1412A/B (preferred) or Calculus 1000A/B or Calculus 1500A/B or the former Applied Mathematics 1412A/B.",
-    antirequisites: "Physics 1021; Physics 1101A/B; Physics 1201A/B; Physics 1501A/B; the former Physics 1028A/B; the former Physics 1301A/B.",
+    prerequisites: "Grade 12U Calculus and Vectors (MCV4U) or MATH 0110A/B; Grade 12U Physics (SPH4U). Corequisite: NMM 1412A/B (preferred) or Calculus 1000A/B or Calculus 1500A/B or the former Applied MATH 1412A/B.",
+    antirequisites: "PHYS 1021; PHYS 1101A/B; PHYS 1201A/B; PHYS 1501A/B; the former PHYS 1028A/B; the former PHYS 1301A/B.",
   },
   {
     code: "PHYS 1402A/B",
     title: "Physics for Engineering Students II",
     description: "Electricity, magnetism, and modern physics, continuing from Physics for Engineering Students I.",
     termsOffered: ["FALL", "WINTER"],
-    prerequisites: "Physics 1401A/B or Physics 1501A/B; NMM 1412A/B (preferred) or Calculus 1000A/B or Calculus 1500A/B or the former Applied Mathematics 1412A/B, or permission of the department.",
-    antirequisites: "Physics 1021; Physics 1102A/B; Physics 1202A/B; Physics 1502A/B; the former Physics 1029A/B; the former Physics 1302A/B.",
+    prerequisites: "PHYS 1401A/B or PHYS 1501A/B; NMM 1412A/B (preferred) or Calculus 1000A/B or Calculus 1500A/B or the former Applied MATH 1412A/B, or permission of the department.",
+    antirequisites: "PHYS 1021; PHYS 1102A/B; PHYS 1202A/B; PHYS 1502A/B; the former PHYS 1029A/B; the former PHYS 1302A/B.",
   },
 ];

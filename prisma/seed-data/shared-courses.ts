@@ -26,8 +26,8 @@ export const SHARED_COURSES: UpperYearCourse[] = [
     yearLevel: 2,
     termsOffered: ["FALL", "WINTER"] as Term[],
     isCore: true,
-    prerequisites: "NMM 1411A/B or the former Applied Mathematics 1411A/B, and NMM 1414A/B or the former Applied Mathematics 1414A/B or the former Applied Mathematics 1413.",
-    antirequisites: "Applied Mathematics 2402A/B; the former NMM 2270A/B.",
+    prerequisites: "NMM 1411A/B or the former Applied MATH 1411A/B, and NMM 1414A/B or the former Applied MATH 1414A/B or the former Applied MATH 1413.",
+    antirequisites: "Applied MATH 2402A/B; the former NMM 2270A/B.",
   },
   {
     code: "NMM 2276A/B",
@@ -36,8 +36,8 @@ export const SHARED_COURSES: UpperYearCourse[] = [
     yearLevel: 2,
     termsOffered: ["FALL", "WINTER"] as Term[],
     isCore: true,
-    prerequisites: "NMM 2270A/B or the former Applied Mathematics 2270A/B.",
-    antirequisites: "Calculus 2302A/B; Calculus 2303A/B; Mathematics 2500A/B; NMM 2277A/B; the former Applied Mathematics 2276A/B; the former Applied Mathematics 2277A/B; the former Calculus 2502A/B; the former Calculus 2503A/B.",
+    prerequisites: "NMM 2270A/B or the former Applied MATH 2270A/B.",
+    antirequisites: "Calculus 2302A/B; Calculus 2303A/B; MATH 2500A/B; NMM 2277A/B; the former Applied MATH 2276A/B; the former Applied MATH 2277A/B; the former Calculus 2502A/B; the former Calculus 2503A/B.",
   },
   {
     code: "NMM 2277A/B",
@@ -46,8 +46,8 @@ export const SHARED_COURSES: UpperYearCourse[] = [
     yearLevel: 2,
     termsOffered: ["FALL", "WINTER"] as Term[],
     isCore: true,
-    prerequisites: "NMM 2270A/B or the former Applied Mathematics 2270A/B.",
-    antirequisites: "Calculus 2302A/B; Calculus 2303A/B; Mathematics 2500A/B; NMM 2276A/B; the former Applied Mathematics 2276A/B; the former Applied Mathematics 2277A/B; the former Calculus 2502A/B; the former Calculus 2503A/B.",
+    prerequisites: "NMM 2270A/B or the former Applied MATH 2270A/B.",
+    antirequisites: "Calculus 2302A/B; Calculus 2303A/B; MATH 2500A/B; NMM 2276A/B; the former Applied MATH 2276A/B; the former Applied MATH 2277A/B; the former Calculus 2502A/B; the former Calculus 2503A/B.",
   },
   {
     code: "NMM 3415A/B",
@@ -56,8 +56,8 @@ export const SHARED_COURSES: UpperYearCourse[] = [
     yearLevel: 3,
     termsOffered: ["FALL", "WINTER"] as Term[],
     isCore: true,
-    prerequisites: "NMM 2270A/B or the former Applied Mathematics 2270A/B, and NMM 2276A/B or the former Applied Mathematics 2276A/B.",
-    antirequisites: "Applied Mathematics 3413A/B; Applied Mathematics 3815A/B; the former Applied Mathematics 3415A/B.",
+    prerequisites: "NMM 2270A/B or the former Applied MATH 2270A/B, and NMM 2276A/B or the former Applied MATH 2276A/B.",
+    antirequisites: "Applied MATH 3413A/B; Applied MATH 3815A/B; the former Applied MATH 3415A/B.",
   },
   {
     code: "SS 2141A/B",
@@ -80,7 +80,7 @@ export const SHARED_COURSES: UpperYearCourse[] = [
     antirequisites: "All other introductory statistics courses except SS 1023A/B, Data Science 1000A/B, or SS 1024A/B -- see the calendar for the full cross-faculty list.",
   },
   {
-    code: "Writ 2130F/G",
+    code: "WRIT 2130F/G",
     title: "Building Better (Communication) Bridges: Rhetoric & Professional Communication for Engineers",
     description: "Rhetorical principles and the practice of written, oral, and visual communication in professional engineering contexts, including drafting, designing, editing, and revising technical documents.",
     yearLevel: 2,
@@ -107,6 +107,6 @@ export const SHARED_COURSES: UpperYearCourse[] = [
     termsOffered: ["FALL", "WINTER"] as Term[],
     isCore: true,
     prerequisites: "Completion of second year of the AISE or Software Engineering program, or permission of the department.",
-    antirequisites: "The former Computer Science 4414A/B; the former Statistical Sciences 3850F/G; the former SE 4460A/B.",
+    antirequisites: "The former CS 4414A/B; the former SS 3850F/G; the former SE 4460A/B.",
   },
 ];
