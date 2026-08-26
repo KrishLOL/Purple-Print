@@ -18,6 +18,9 @@ export function SiteHeader() {
           <Link href="/browse" className="text-text-muted hover:text-text">
             Browse
           </Link>
+          <Link href="/plan" className="text-text-muted hover:text-text">
+            Roadmap
+          </Link>
           <Link href="/me" className="text-text-muted hover:text-text">
             Account
           </Link>

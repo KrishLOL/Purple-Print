@@ -116,6 +116,16 @@ export default async function Home() {
       <section className="mt-8 text-center">
         <p className="text-sm text-text-muted">Planning your degree?</p>
         <Link
+          href="/plan"
+          className="font-num mt-3 inline-block border border-accent px-5 py-2.5 text-xs uppercase tracking-wider text-accent hover:bg-accent hover:text-accent-contrast"
+        >
+          See your degree roadmap
+        </Link>
+      </section>
+
+      <section className="mt-8 text-center">
+        <p className="text-sm text-text-muted">Curious how courses connect?</p>
+        <Link
           href="/paths"
           className="font-num mt-3 inline-block border border-accent px-5 py-2.5 text-xs uppercase tracking-wider text-accent hover:bg-accent hover:text-accent-contrast"
         >

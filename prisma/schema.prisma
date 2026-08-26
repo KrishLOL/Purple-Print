@@ -75,9 +75,10 @@ model Discipline {
   // from the seven core disciplines + First Year.
   isCombinedDegree Boolean @default(false)
 
-  courses     Course[]
-  professors  Professor[]
-  users       User[]
+  courses          Course[]
+  professors       Professor[]
+  users            User[]
+  progressionSlots ProgressionSlot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -117,9 +118,10 @@ model Course {
 
   isSeedData Boolean @default(false)
 
-  professors CourseProfessor[]
-  reviews    Review[]
-  savedBy    SavedCourse[]
+  professors       CourseProfessor[]
+  reviews          Review[]
+  savedBy          SavedCourse[]
+  progressionSlots ProgressionSlot[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -171,6 +173,38 @@ model CourseProfessor {
 
   @@unique([courseId, professorId])
   @@index([professorId])
+}
+
+// One cell in a discipline's official term-by-term progression, sourced
+// from Western's own Progression Sheets (the same documents used to audit
+// the course catalog for completeness). Only modelled for the 8 disciplines
+// with a clean standalone sequence -- AISE and Biomedical are combined
+// degrees layered on top of a base discipline rather than a path of their
+// own, so they're deliberately left out here rather than forced into a grid
+// that would misrepresent them. Year 1 is the shared first-year sequence
+// (same for every discipline), so it isn't modelled per-discipline either.
+model ProgressionSlot {
+  id String @id @default(cuid())
+
+  disciplineId String
+  discipline   Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
+
+  yearLevel Int // 2, 3, or 4
+  term      Term // FALL = "Term A" position, WINTER = "Term B" position in the progression sheet
+  sortOrder Int  @default(0)
+
+  courseId String?
+  course   Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Set when this slot isn't one fixed course -- e.g. "1 technical elective"
+  // or "ECE 4460A/B or ECE 4469A/B (choose one)". Null when courseId is set.
+  electiveLabel String?
+
+  isSeedData Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([disciplineId, yearLevel, term])
 }
 
 // ---------------------------------------------------------------------------

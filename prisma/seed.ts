@@ -7,6 +7,7 @@ import { FIRST_YEAR_COURSES } from "./seed-data/first-year-courses";
 import { UPPER_YEAR_COURSES } from "./seed-data/upper-year-courses";
 import { SHARED_COURSES } from "./seed-data/shared-courses";
 import { REAL_PROFESSORS } from "./seed-data/professors";
+import { PROGRESSION } from "./seed-data/progression";
 import {
   FIRST_NAMES,
   LAST_NAMES,
@@ -305,6 +306,49 @@ async function linkCourseProfessors() {
   console.log(`Linked ${links} course-professor pairs.`);
 }
 
+async function seedProgression() {
+  const courses = await prisma.course.findMany({ where: { isSeedData: true } });
+  const courseIdByCode = new Map(courses.map((c) => [c.code, c.id]));
+
+  const disciplineSlugs = Object.keys(PROGRESSION);
+  const { count: pruned } = await prisma.progressionSlot.deleteMany({
+    where: { isSeedData: true, discipline: { slug: { in: disciplineSlugs } } },
+  });
+
+  let slots = 0;
+  let unmatchedCodes = 0;
+  for (const [slug, entries] of Object.entries(PROGRESSION)) {
+    const discipline = await prisma.discipline.findUniqueOrThrow({ where: { slug } });
+    for (const entry of entries) {
+      let courseId: string | null = null;
+      if (entry.courseCode) {
+        courseId = courseIdByCode.get(entry.courseCode) ?? null;
+        if (!courseId) {
+          unmatchedCodes++;
+          continue;
+        }
+      }
+      await prisma.progressionSlot.create({
+        data: {
+          disciplineId: discipline.id,
+          yearLevel: entry.yearLevel,
+          term: entry.term,
+          sortOrder: entry.sortOrder,
+          courseId,
+          electiveLabel: entry.electiveLabel ?? null,
+          isSeedData: true,
+        },
+      });
+      slots++;
+    }
+  }
+
+  if (unmatchedCodes > 0) {
+    console.warn(`${unmatchedCodes} progression-slot course codes didn't match any seeded course.`);
+  }
+  console.log(`Seeded ${slots} progression slots (pruned ${pruned} stale).`);
+}
+
 async function seedUsers() {
   const disciplines = await prisma.discipline.findMany();
   const userCount = 110;
@@ -459,6 +503,7 @@ async function main() {
   await seedCourses();
   await seedProfessors();
   await linkCourseProfessors();
+  await seedProgression();
 
   // Synthetic reviews are opt-in only. Local dev and production share one
   // database (see README.md#database), so an ordinary `pnpm db:seed` run
