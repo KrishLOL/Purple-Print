@@ -9,10 +9,8 @@ export const metadata: Metadata = {
 };
 
 // Only disciplines with a clean standalone Progression Sheet are shown here.
-// AISE and Biomedical are combined degrees layered on a base discipline
-// rather than a path of their own, so they're deliberately excluded rather
-// than shown with a misleading grid. Year 1 is identical across every
-// discipline, so it's linked out to rather than duplicated per discipline.
+// Year 1 is identical across every discipline, so it's linked out to rather
+// than duplicated per discipline.
 const PLAN_DISCIPLINE_ORDER = [
   "chemical",
   "civil",
@@ -23,14 +21,32 @@ const PLAN_DISCIPLINE_ORDER = [
   "software",
 ];
 
+// AISE and Biomedical are combined degrees layered on top of one of these 4
+// base disciplines (civil, integrated, and software have no AISE/BME
+// option) -- see prisma/seed-data/progression-combined.ts. Keyed by base
+// discipline slug -> the overlay slugs that discipline actually offers.
+const COMBO_OVERLAYS_BY_BASE: Record<string, string[]> = {
+  electrical: ["aise", "biomedical"],
+  mechanical: ["aise", "biomedical"],
+  mechatronics: ["aise", "biomedical"],
+  chemical: ["aise", "biomedical"],
+};
+
 export default async function PlanPage({ searchParams }: PageProps<"/plan">) {
   const raw = await searchParams;
   const rawSlug = Array.isArray(raw.discipline) ? raw.discipline[0] : raw.discipline;
+  const rawOverlay = Array.isArray(raw.overlay) ? raw.overlay[0] : raw.overlay;
 
-  const disciplines = await prisma.discipline.findMany({
-    where: { slug: { in: PLAN_DISCIPLINE_ORDER } },
-    select: { slug: true, name: true, colorAccent: true },
-  });
+  const [disciplines, overlayDisciplines] = await Promise.all([
+    prisma.discipline.findMany({
+      where: { slug: { in: PLAN_DISCIPLINE_ORDER } },
+      select: { slug: true, name: true, colorAccent: true },
+    }),
+    prisma.discipline.findMany({
+      where: { slug: { in: ["aise", "biomedical"] } },
+      select: { id: true, slug: true, name: true },
+    }),
+  ]);
   const orderedDisciplines = [...disciplines].sort(
     (a, b) => PLAN_DISCIPLINE_ORDER.indexOf(a.slug) - PLAN_DISCIPLINE_ORDER.indexOf(b.slug),
   );
@@ -38,8 +54,19 @@ export default async function PlanPage({ searchParams }: PageProps<"/plan">) {
   const selectedSlug =
     rawSlug && orderedDisciplines.some((d) => d.slug === rawSlug) ? rawSlug : (orderedDisciplines[0]?.slug ?? "");
 
+  const availableOverlaySlugs = COMBO_OVERLAYS_BY_BASE[selectedSlug] ?? [];
+  const availableOverlays = overlayDisciplines
+    .filter((d) => availableOverlaySlugs.includes(d.slug))
+    .map(({ slug, name }) => ({ slug, name }));
+  const selectedOverlay = rawOverlay
+    ? (overlayDisciplines.find((d) => d.slug === rawOverlay && availableOverlaySlugs.includes(d.slug)) ?? null)
+    : null;
+
   const slots = await prisma.progressionSlot.findMany({
-    where: { discipline: { slug: selectedSlug } },
+    where: {
+      discipline: { slug: selectedSlug },
+      overlayDisciplineId: selectedOverlay?.id ?? null,
+    },
     select: {
       yearLevel: true,
       term: true,
@@ -67,9 +94,16 @@ export default async function PlanPage({ searchParams }: PageProps<"/plan">) {
         >
           Prerequisite Paths
         </Link>
-        .
+        . If you&rsquo;re in one of the double-degree programs (AISE or Biomedical Engineering), pick it
+        from the second dropdown below for the full 5-year combined sequence.
       </p>
-      <RoadmapView disciplines={orderedDisciplines} selectedSlug={selectedSlug} slots={slots} />
+      <RoadmapView
+        disciplines={orderedDisciplines}
+        selectedSlug={selectedSlug}
+        availableOverlays={availableOverlays}
+        selectedOverlaySlug={selectedOverlay?.slug ?? null}
+        slots={slots}
+      />
     </main>
   );
 }

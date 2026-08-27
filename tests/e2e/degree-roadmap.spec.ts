@@ -26,4 +26,27 @@ test.describe("degree roadmap", () => {
     await target.click();
     await expect(page).toHaveURL(/\/course\/CEE%202220A%2FB/);
   });
+
+  test("choosing a double-degree program switches to the 5-year combined sequence", async ({ page }) => {
+    await page.goto("/plan?discipline=electrical");
+    await expect(page.getByRole("link", { name: /AISE 2205A\/B/ })).toHaveCount(0);
+
+    await page.getByLabel("Choose a double-degree program").selectOption("aise");
+    await expect(page).toHaveURL(/discipline=electrical/);
+    await expect(page).toHaveURL(/overlay=aise/);
+    await expect(page.getByText(/double degree restructures the curriculum/)).toBeVisible();
+    await expect(page.getByRole("link", { name: /AISE 2205A\/B/ })).toBeVisible();
+  });
+
+  test("a discipline with no double-degree option disables the second dropdown", async ({ page }) => {
+    await page.goto("/plan?discipline=civil");
+    await expect(page.getByLabel("Choose a double-degree program")).toBeDisabled();
+  });
+
+  test("switching the base discipline drops a no-longer-valid overlay selection", async ({ page }) => {
+    await page.goto("/plan?discipline=electrical&overlay=aise");
+    await page.getByLabel("Choose a discipline").selectOption("civil");
+    await expect(page).not.toHaveURL(/overlay=/);
+    await expect(page.getByLabel("Choose a double-degree program")).toBeDisabled();
+  });
 });

@@ -16,17 +16,30 @@ const TERM_LABELS: Record<string, string> = { FALL: "Term A (Fall)", WINTER: "Te
 export function RoadmapView({
   disciplines,
   selectedSlug,
+  availableOverlays,
+  selectedOverlaySlug,
   slots,
 }: {
   disciplines: { slug: string; name: string; colorAccent: string }[];
   selectedSlug: string;
+  availableOverlays: { slug: string; name: string }[];
+  selectedOverlaySlug: string | null;
   slots: RoadmapSlot[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
 
   function changeDiscipline(slug: string) {
+    // A new base discipline may not offer the current overlay (or any
+    // overlay at all), so switching disciplines drops it rather than
+    // carrying forward a combo that might not exist for the new choice.
     router.push(`${pathname}?discipline=${slug}`, { scroll: false });
+  }
+
+  function changeOverlay(overlaySlug: string) {
+    const params = new URLSearchParams({ discipline: selectedSlug });
+    if (overlaySlug !== "none") params.set("overlay", overlaySlug);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }
 
   const years = [...new Set(slots.map((s) => s.yearLevel))].sort((a, b) => a - b);
@@ -47,6 +60,20 @@ export function RoadmapView({
             </option>
           ))}
         </select>
+        <select
+          value={selectedOverlaySlug ?? "none"}
+          onChange={(e) => changeOverlay(e.target.value)}
+          disabled={availableOverlays.length === 0}
+          className="font-num border border-border bg-surface px-3 py-2 text-xs uppercase tracking-wider text-text focus:border-accent focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Choose a double-degree program"
+        >
+          <option value="none">Single degree</option>
+          {availableOverlays.map((o) => (
+            <option key={o.slug} value={o.slug}>
+              + {o.name}
+            </option>
+          ))}
+        </select>
         <span className="flex items-center gap-1.5 text-xs text-text-muted">
           <span className="inline-block h-3 w-6 border border-solid border-text-muted bg-bg" aria-hidden />
           required course
@@ -56,6 +83,12 @@ export function RoadmapView({
           elective slot
         </span>
       </div>
+      {selectedOverlaySlug && (
+        <p className="mb-6 border border-border bg-surface px-4 py-3 text-xs text-text-muted">
+          This is the 5-year combined sequence — the double degree restructures the curriculum rather
+          than just adding courses on top of the single-degree path.
+        </p>
+      )}
 
       {years.length === 0 ? (
         <p className="border border-border bg-surface p-6 text-center text-sm text-text-muted">

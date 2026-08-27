@@ -79,6 +79,9 @@ model Discipline {
   professors       Professor[]
   users            User[]
   progressionSlots ProgressionSlot[]
+  // Slots where this discipline is the AISE/Biomedical overlay on top of
+  // someone else's base progression (see ProgressionSlot.overlayDiscipline).
+  overlayOfSlots   ProgressionSlot[] @relation("ProgressionSlotOverlay")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -177,19 +180,26 @@ model CourseProfessor {
 
 // One cell in a discipline's official term-by-term progression, sourced
 // from Western's own Progression Sheets (the same documents used to audit
-// the course catalog for completeness). Only modelled for the 8 disciplines
-// with a clean standalone sequence -- AISE and Biomedical are combined
-// degrees layered on top of a base discipline rather than a path of their
-// own, so they're deliberately left out here rather than forced into a grid
-// that would misrepresent them. Year 1 is the shared first-year sequence
-// (same for every discipline), so it isn't modelled per-discipline either.
+// the course catalog for completeness). Modelled for the 7 core disciplines
+// with a clean standalone 4-year sequence, plus AISE/Biomedical as a 5-year
+// overlay on top of the 4 base disciplines that actually offer that combo
+// (electrical, mechanical, mechatronics, chemical) -- see overlayDisciplineId.
+// Year 1 is the shared first-year sequence (same for every discipline), so
+// it isn't modelled per-discipline either.
 model ProgressionSlot {
   id String @id @default(cuid())
 
   disciplineId String
   discipline   Discipline @relation(fields: [disciplineId], references: [id], onDelete: Cascade)
 
-  yearLevel Int // 2, 3, or 4
+  // Null for a plain single-discipline slot. Set to AISE's or Biomedical's
+  // Discipline id when this slot belongs to that combined degree's 5-year
+  // sequence atop `discipline` (the base discipline) rather than the base
+  // discipline's own standalone 4-year sequence.
+  overlayDisciplineId String?
+  overlayDiscipline   Discipline? @relation("ProgressionSlotOverlay", fields: [overlayDisciplineId], references: [id], onDelete: Cascade)
+
+  yearLevel Int // 2 through 5 (5 only appears for combined-degree overlays)
   term      Term // FALL = "Term A" position, WINTER = "Term B" position in the progression sheet
   sortOrder Int  @default(0)
 
@@ -204,7 +214,7 @@ model ProgressionSlot {
 
   createdAt DateTime @default(now())
 
-  @@index([disciplineId, yearLevel, term])
+  @@index([disciplineId, overlayDisciplineId, yearLevel, term])
 }
 
 // ---------------------------------------------------------------------------

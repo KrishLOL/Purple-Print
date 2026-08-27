@@ -8,6 +8,7 @@ import { UPPER_YEAR_COURSES } from "./seed-data/upper-year-courses";
 import { SHARED_COURSES } from "./seed-data/shared-courses";
 import { REAL_PROFESSORS } from "./seed-data/professors";
 import { PROGRESSION } from "./seed-data/progression";
+import { COMBINED_PROGRESSION } from "./seed-data/progression-combined";
 import {
   FIRST_NAMES,
   LAST_NAMES,
@@ -346,7 +347,57 @@ async function seedProgression() {
   if (unmatchedCodes > 0) {
     console.warn(`${unmatchedCodes} progression-slot course codes didn't match any seeded course.`);
   }
-  console.log(`Seeded ${slots} progression slots (pruned ${pruned} stale).`);
+
+  // Combined-degree overlays (AISE / Biomedical on top of a base discipline).
+  const comboKeys = Object.keys(COMBINED_PROGRESSION);
+  const comboBaseSlugs = [...new Set(comboKeys.map((k) => k.split("+")[0]))];
+  const { count: comboPruned } = await prisma.progressionSlot.deleteMany({
+    where: {
+      isSeedData: true,
+      discipline: { slug: { in: comboBaseSlugs } },
+      overlayDisciplineId: { not: null },
+    },
+  });
+
+  let comboSlots = 0;
+  let comboUnmatchedCodes = 0;
+  for (const [key, entries] of Object.entries(COMBINED_PROGRESSION)) {
+    const [baseSlug, overlaySlug] = key.split("+");
+    const [discipline, overlayDiscipline] = await Promise.all([
+      prisma.discipline.findUniqueOrThrow({ where: { slug: baseSlug } }),
+      prisma.discipline.findUniqueOrThrow({ where: { slug: overlaySlug } }),
+    ]);
+    for (const entry of entries) {
+      let courseId: string | null = null;
+      if (entry.courseCode) {
+        courseId = courseIdByCode.get(entry.courseCode) ?? null;
+        if (!courseId) {
+          comboUnmatchedCodes++;
+          continue;
+        }
+      }
+      await prisma.progressionSlot.create({
+        data: {
+          disciplineId: discipline.id,
+          overlayDisciplineId: overlayDiscipline.id,
+          yearLevel: entry.yearLevel,
+          term: entry.term,
+          sortOrder: entry.sortOrder,
+          courseId,
+          electiveLabel: entry.electiveLabel ?? null,
+          isSeedData: true,
+        },
+      });
+      comboSlots++;
+    }
+  }
+
+  if (comboUnmatchedCodes > 0) {
+    console.warn(`${comboUnmatchedCodes} combined-degree progression-slot course codes didn't match any seeded course.`);
+  }
+  console.log(
+    `Seeded ${slots} progression slots (pruned ${pruned} stale) and ${comboSlots} combined-degree slots (pruned ${comboPruned} stale).`,
+  );
 }
 
 async function seedUsers() {
