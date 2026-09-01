@@ -52,7 +52,7 @@ const TRIGGER_TERMS = [
   "sue",
 ];
 
-function containsWord(text: string, word: string): boolean {
+export function containsWord(text: string, word: string): boolean {
   const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`\\b${escaped}\\b`, "i").test(text);
 }
@@ -75,9 +75,7 @@ export function screenReview(body: string, professorNames: string[]): Moderation
     reasons.push("possible profanity/slur");
   }
 
-  const mentionsProfessor = professorNames.some(
-    (name) => name.trim().length > 0 && body.toLowerCase().includes(name.toLowerCase()),
-  );
+  const mentionsProfessor = professorNames.some((name) => name.trim().length > 0 && containsWord(body, name));
   const triggerHit = TRIGGER_TERMS.find((t) => containsWord(body, t));
   if (mentionsProfessor && triggerHit) {
     reasons.push(`names a professor alongside a flagged term ("${triggerHit}")`);
@@ -86,4 +84,31 @@ export function screenReview(body: string, professorNames: string[]): Moderation
   return reasons.length > 0
     ? { status: "PENDING", reasons }
     : { status: "PUBLISHED", reasons: [] };
+}
+
+/**
+ * Used by the review wizard's "this mentions someone you didn't select"
+ * warning. Returns the full name of the first professor (other than the
+ * one excluded) whose first or last name appears in `body` as a whole
+ * word -- e.g. a professor named "Tim" shouldn't match "sometimes".
+ */
+export function findMentionedOtherProfessor(
+  body: string,
+  professors: { id: string; firstName: string; lastName: string }[],
+  opts: { excludeId?: string | null; excludeFullName?: string | null } = {},
+): string | null {
+  if (!body) return null;
+  const excludeFullName = opts.excludeFullName?.trim().toLowerCase() || null;
+  for (const p of professors) {
+    if (opts.excludeId && p.id === opts.excludeId) continue;
+    const fullName = `${p.firstName} ${p.lastName}`;
+    // The name a student just typed under "Other" isn't a stray mention --
+    // it's who the review is about -- so a coincidental match there
+    // shouldn't trigger the warning.
+    if (excludeFullName && fullName.toLowerCase() === excludeFullName) continue;
+    if (containsWord(body, p.firstName) || containsWord(body, p.lastName)) {
+      return fullName;
+    }
+  }
+  return null;
 }

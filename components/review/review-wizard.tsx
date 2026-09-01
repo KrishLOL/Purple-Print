@@ -12,6 +12,7 @@ import {
   type ReviewFormValues,
 } from "@/lib/review-schema";
 import { submitReview } from "@/app/review/new/actions";
+import { findMentionedOtherProfessor } from "@/lib/moderation";
 
 type CourseOption = { id: string; code: string; title: string };
 type ProfessorOption = {
@@ -148,17 +149,14 @@ export function ReviewWizard({
   );
   const selectedProfessor = eligibleProfessors.find((p) => p.id === draft.professorId) ?? null;
 
-  const otherProfessorMentioned = useMemo(() => {
-    if (!draft.body) return null;
-    const lower = draft.body.toLowerCase();
-    for (const p of professors) {
-      if (p.id === draft.professorId) continue;
-      if (lower.includes(p.firstName.toLowerCase()) || lower.includes(p.lastName.toLowerCase())) {
-        return `${p.firstName} ${p.lastName}`;
-      }
-    }
-    return null;
-  }, [draft.body, draft.professorId, professors]);
+  const otherProfessorMentioned = useMemo(
+    () =>
+      findMentionedOtherProfessor(draft.body, professors, {
+        excludeId: draft.professorId,
+        excludeFullName: draft.otherProfessor ? draft.otherProfessorName : null,
+      }),
+    [draft.body, draft.professorId, draft.otherProfessor, draft.otherProfessorName, professors],
+  );
 
   function canAdvance(): boolean {
     switch (step) {
