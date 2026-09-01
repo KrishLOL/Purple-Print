@@ -14,6 +14,9 @@ export function Footer() {
         <Link href="/terms" className="hover:text-text">
           Terms
         </Link>
+        <a href="mailto:purpleprint.app@gmail.com" className="hover:text-text">
+          Contact
+        </a>
       </p>
     </footer>
   );
