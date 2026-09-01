@@ -14,6 +14,10 @@ export const reviewFormSchema = z
   .object({
     courseId: z.string().min(1, "Pick a course"),
     professorId: z.string().nullable(),
+    // Set instead of professorId when the student's professor isn't in the
+    // catalog yet (the "Other" choice in the wizard) -- see
+    // lib/professor-suggestions.ts for how this gets tallied and promoted.
+    suggestedProfessorName: z.string().trim().min(2, "Type at least 2 characters").max(80).nullable(),
     termTaken: z.enum(TERM_VALUES, { message: "Pick a term" }),
     yearTaken: z
       .number()
@@ -34,7 +38,14 @@ export const reviewFormSchema = z
       .max(2000, "Keep it under 2000 characters"),
   })
   .superRefine((data, ctx) => {
-    if (data.professorId) {
+    if (data.professorId && data.suggestedProfessorName) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["suggestedProfessorName"],
+        message: "Pick a listed professor or type one under Other, not both",
+      });
+    }
+    if (data.professorId || data.suggestedProfessorName) {
       if (data.clarity == null) {
         ctx.addIssue({ code: "custom", path: ["clarity"], message: "Rate clarity for this professor" });
       }

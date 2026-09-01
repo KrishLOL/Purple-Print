@@ -74,7 +74,11 @@ export async function getCourseDetail(code: string) {
     body: r.body,
     helpfulCount: r.helpfulCount,
     createdAt: r.createdAt.toISOString(),
-    professorLabel: r.professor ? `${r.professor.firstName} ${r.professor.lastName}` : null,
+    professorLabel: r.professor
+      ? `${r.professor.firstName} ${r.professor.lastName}`
+      : r.suggestedProfessorName
+        ? `${r.suggestedProfessorName} (unconfirmed)`
+        : null,
   }));
 
   return {

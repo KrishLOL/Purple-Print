@@ -50,6 +50,12 @@ enum ReportStatus {
   DISMISSED
 }
 
+enum SuggestionStatus {
+  OPEN
+  PROMOTED
+  DISMISSED
+}
+
 enum Role {
   STUDENT
   MOD
@@ -121,10 +127,11 @@ model Course {
 
   isSeedData Boolean @default(false)
 
-  professors       CourseProfessor[]
-  reviews          Review[]
-  savedBy          SavedCourse[]
-  progressionSlots ProgressionSlot[]
+  professors           CourseProfessor[]
+  reviews              Review[]
+  savedBy              SavedCourse[]
+  progressionSlots     ProgressionSlot[]
+  professorSuggestions ProfessorSuggestion[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -361,6 +368,14 @@ model Review {
   professorId String?
   professor   Professor? @relation(fields: [professorId], references: [id], onDelete: SetNull)
 
+  // Free-text name a student typed when their professor wasn't in the
+  // catalog yet (the "Other" choice in the review wizard) -- mutually
+  // exclusive with professorId at write time, see submitReview. Kept even
+  // after a ProfessorSuggestion promotes: professorId gets backfilled onto
+  // the review rather than clearing this, so it stays a record of what was
+  // originally typed.
+  suggestedProfessorName String?
+
   termTaken Term
   yearTaken Int
 
@@ -455,4 +470,31 @@ model ModerationLog {
   createdAt DateTime @default(now())
 
   @@index([targetType, targetId])
+}
+
+// A free-text professor name students typed via the review wizard's "Other"
+// option, tallied per course. Once mentionCount crosses the queue threshold
+// (see lib/professor-suggestions.ts) it surfaces in /admin/moderation for a
+// human to either link it to an existing Professor or create a new one --
+// never auto-published, so a coordinated handful of joke/wrong submissions
+// can't silently become a "real" professor.
+model ProfessorSuggestion {
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Case/whitespace/title-folded form used for de-duplication (see
+  // normalizeProfessorName). displayName keeps the first-seen raw casing,
+  // used as the default when a moderator promotes this suggestion.
+  normalizedName String
+  displayName    String
+
+  mentionCount Int              @default(1)
+  status       SuggestionStatus @default(OPEN)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([courseId, normalizedName])
+  @@index([courseId, status])
 }

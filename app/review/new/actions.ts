@@ -7,6 +7,7 @@ import { recomputeCourseAggregates, recomputeProfessorAggregates } from "@/lib/r
 import { reviewFormSchema, type ReviewFormValues } from "@/lib/review-schema";
 import { screenReview } from "@/lib/moderation";
 import { logModerationAction } from "@/lib/mod-log";
+import { normalizeProfessorName } from "@/lib/professor-suggestions";
 
 const MAX_REVIEWS_PER_DAY = 5;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -40,6 +41,10 @@ export async function submitReview(values: ReviewFormValues): Promise<SubmitRevi
     `${p.firstName} ${p.lastName}`,
     p.lastName,
   ]);
+  // An "Other" name hasn't been vetted at all, so it needs to be in the
+  // screening pool too -- otherwise a misconduct allegation against someone
+  // not yet in the catalog would sail straight through auto-publish.
+  if (data.suggestedProfessorName) professorNames.push(data.suggestedProfessorName);
   const verdict = screenReview(data.body, professorNames);
 
   try {
@@ -49,6 +54,7 @@ export async function submitReview(values: ReviewFormValues): Promise<SubmitRevi
           userId,
           courseId: data.courseId,
           professorId: data.professorId,
+          suggestedProfessorName: data.suggestedProfessorName,
           termTaken: data.termTaken,
           yearTaken: data.yearTaken,
           useful: data.useful,
@@ -63,6 +69,15 @@ export async function submitReview(values: ReviewFormValues): Promise<SubmitRevi
           status: verdict.status,
         },
       });
+
+      if (data.suggestedProfessorName) {
+        const normalizedName = normalizeProfessorName(data.suggestedProfessorName);
+        await tx.professorSuggestion.upsert({
+          where: { courseId_normalizedName: { courseId: data.courseId, normalizedName } },
+          create: { courseId: data.courseId, normalizedName, displayName: data.suggestedProfessorName },
+          update: { mentionCount: { increment: 1 } },
+        });
+      }
 
       if (verdict.status === "PENDING") {
         await logModerationAction(tx, {

@@ -37,6 +37,8 @@ type DraftState = {
   courseId: string | null;
   professorId: string | null;
   noProfessor: boolean;
+  otherProfessor: boolean;
+  otherProfessorName: string;
   termTaken: (typeof TERM_VALUES)[number] | null;
   yearTaken: number | null;
   useful: number;
@@ -54,6 +56,8 @@ const EMPTY_DRAFT: DraftState = {
   courseId: null,
   professorId: null,
   noProfessor: false,
+  otherProfessor: false,
+  otherProfessorName: "",
   termTaken: null,
   yearTaken: null,
   useful: 3,
@@ -71,19 +75,22 @@ function toFormValues(draft: DraftState): ReviewFormValues | null {
   if (!draft.courseId || !draft.termTaken || !draft.yearTaken || draft.liked == null || !draft.gradeReceived) {
     return null;
   }
-  const hasProfessor = Boolean(draft.professorId) && !draft.noProfessor;
+  const hasKnownProfessor = Boolean(draft.professorId) && !draft.noProfessor && !draft.otherProfessor;
+  const hasOtherProfessor = draft.otherProfessor && draft.otherProfessorName.trim().length >= 2;
+  const hasProfessorInfo = hasKnownProfessor || hasOtherProfessor;
   return {
     courseId: draft.courseId,
-    professorId: hasProfessor ? draft.professorId : null,
+    professorId: hasKnownProfessor ? draft.professorId : null,
+    suggestedProfessorName: hasOtherProfessor ? draft.otherProfessorName.trim() : null,
     termTaken: draft.termTaken,
     yearTaken: draft.yearTaken,
     useful: draft.useful,
     easy: draft.easy,
     liked: draft.liked,
     workloadHours: draft.workloadHours,
-    clarity: hasProfessor ? draft.clarity : null,
-    helpfulness: hasProfessor ? draft.helpfulness : null,
-    wouldRetake: hasProfessor ? draft.wouldRetake : null,
+    clarity: hasProfessorInfo ? draft.clarity : null,
+    helpfulness: hasProfessorInfo ? draft.helpfulness : null,
+    wouldRetake: hasProfessorInfo ? draft.wouldRetake : null,
     gradeReceived: draft.gradeReceived,
     body: draft.body,
   };
@@ -158,7 +165,10 @@ export function ReviewWizard({
       case 0:
         return Boolean(draft.courseId);
       case 1:
-        return draft.noProfessor || Boolean(draft.professorId);
+        return (
+          draft.noProfessor ||
+          (draft.otherProfessor ? draft.otherProfessorName.trim().length >= 2 : Boolean(draft.professorId))
+        );
       case 2:
         return Boolean(draft.termTaken && draft.yearTaken);
       case 3:
@@ -215,8 +225,22 @@ export function ReviewWizard({
           professors={eligibleProfessors}
           value={draft.professorId}
           noProfessor={draft.noProfessor}
-          onChange={(id) => update("professorId", id)}
-          onNoProfessor={(v) => update("noProfessor", v)}
+          otherProfessor={draft.otherProfessor}
+          otherProfessorName={draft.otherProfessorName}
+          onChange={(id) => {
+            update("professorId", id);
+            update("noProfessor", false);
+            update("otherProfessor", false);
+          }}
+          onNoProfessor={(v) => {
+            update("noProfessor", v);
+            if (v) update("otherProfessor", false);
+          }}
+          onOtherProfessor={(v) => {
+            update("otherProfessor", v);
+            if (v) update("noProfessor", false);
+          }}
+          onOtherProfessorName={(v) => update("otherProfessorName", v)}
         />
       )}
 
@@ -230,7 +254,17 @@ export function ReviewWizard({
       )}
 
       {step === 3 && (
-        <RatingsStep draft={draft} hasProfessor={draft.noProfessor ? false : Boolean(selectedProfessor)} update={update} />
+        <RatingsStep
+          draft={draft}
+          hasProfessor={
+            draft.noProfessor
+              ? false
+              : draft.otherProfessor
+                ? draft.otherProfessorName.trim().length >= 2
+                : Boolean(selectedProfessor)
+          }
+          update={update}
+        />
       )}
 
       {step === 4 && (
@@ -247,7 +281,8 @@ export function ReviewWizard({
         <PreviewStep
           draft={draft}
           course={selectedCourse}
-          professor={draft.noProfessor ? null : selectedProfessor}
+          professor={draft.noProfessor || draft.otherProfessor ? null : selectedProfessor}
+          otherProfessorName={draft.otherProfessor ? draft.otherProfessorName.trim() : null}
         />
       )}
 
@@ -330,14 +365,22 @@ function ProfessorStep({
   professors,
   value,
   noProfessor,
+  otherProfessor,
+  otherProfessorName,
   onChange,
   onNoProfessor,
+  onOtherProfessor,
+  onOtherProfessorName,
 }: {
   professors: ProfessorOption[];
   value: string | null;
   noProfessor: boolean;
+  otherProfessor: boolean;
+  otherProfessorName: string;
   onChange: (id: string) => void;
   onNoProfessor: (v: boolean) => void;
+  onOtherProfessor: (v: boolean) => void;
+  onOtherProfessorName: (v: string) => void;
 }) {
   return (
     <div>
@@ -347,17 +390,35 @@ function ProfessorStep({
           <button
             key={p.id}
             type="button"
-            onClick={() => {
-              onChange(p.id);
-              onNoProfessor(false);
-            }}
+            onClick={() => onChange(p.id)}
             className={`flex w-full border px-3 py-2 text-left text-sm ${
-              !noProfessor && value === p.id ? "border-accent bg-accent text-accent-contrast" : "border-border hover:border-accent"
+              !noProfessor && !otherProfessor && value === p.id
+                ? "border-accent bg-accent text-accent-contrast"
+                : "border-border hover:border-accent"
             }`}
           >
             {p.firstName} {p.lastName}
           </button>
         ))}
+        <button
+          type="button"
+          onClick={() => onOtherProfessor(true)}
+          className={`w-full border px-3 py-2 text-left text-sm ${
+            otherProfessor ? "border-accent bg-accent text-accent-contrast" : "border-border hover:border-accent"
+          }`}
+        >
+          Other — not listed
+        </button>
+        {otherProfessor && (
+          <input
+            type="text"
+            value={otherProfessorName}
+            onChange={(e) => onOtherProfessorName(e.target.value)}
+            placeholder="Professor's name"
+            maxLength={80}
+            className="w-full border border-border bg-surface px-3 py-2 text-sm text-text placeholder:text-text-muted focus:border-accent focus:outline-none"
+          />
+        )}
         <button
           type="button"
           onClick={() => onNoProfessor(true)}
@@ -371,6 +432,11 @@ function ProfessorStep({
           <p className="text-sm text-text-muted">No professors on file for this course yet — that&rsquo;s fine.</p>
         )}
       </div>
+      {otherProfessor && (
+        <p className="mt-2 text-xs text-text-muted">
+          If enough other students name the same professor for this course, we&rsquo;ll add them for real.
+        </p>
+      )}
     </div>
   );
 }
@@ -585,17 +651,25 @@ function PreviewStep({
   draft,
   course,
   professor,
+  otherProfessorName,
 }: {
   draft: DraftState;
   course: CourseOption | null;
   professor: ProfessorOption | null;
+  otherProfessorName: string | null;
 }) {
+  const professorLabel = professor
+    ? `${professor.firstName} ${professor.lastName}`
+    : otherProfessorName
+      ? `${otherProfessorName} (not yet listed)`
+      : null;
+  const hasProfessorInfo = Boolean(professor || otherProfessorName);
   return (
     <div>
       <h2 className="mb-3 text-lg font-semibold">Preview</h2>
       <CornerCard>
         <p className="font-num text-xs text-text-muted">
-          {course?.code} {professor ? `· ${professor.firstName} ${professor.lastName}` : "· No professor"} ·{" "}
+          {course?.code} {professorLabel ? `· ${professorLabel}` : "· No professor"} ·{" "}
           {draft.termTaken ? TERM_LABELS[draft.termTaken] : ""} {draft.yearTaken}
         </p>
         <p className="mt-3 text-sm leading-relaxed">{draft.body}</p>
@@ -604,7 +678,7 @@ function PreviewStep({
           <span>Easy {draft.easy}/5</span>
           <span>Liked {draft.liked ? "Yes" : "No"}</span>
           <span>Workload {draft.workloadHours}h/wk</span>
-          {professor && (
+          {hasProfessorInfo && (
             <>
               <span>Clarity {draft.clarity}/5</span>
               <span>Helpfulness {draft.helpfulness}/5</span>

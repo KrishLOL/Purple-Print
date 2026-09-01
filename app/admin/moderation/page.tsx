@@ -3,7 +3,15 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { ModActionButton } from "@/components/admin/mod-action-button";
-import { approveReview, banReviewAuthor, removeReview, unbanUser } from "./actions";
+import { splitDisplayName, SUGGESTION_QUEUE_THRESHOLD } from "@/lib/professor-suggestions";
+import {
+  approveReview,
+  banReviewAuthor,
+  dismissProfessorSuggestion,
+  promoteProfessorSuggestion,
+  removeReview,
+  unbanUser,
+} from "./actions";
 
 export const metadata: Metadata = { title: "Moderation" };
 
@@ -19,7 +27,7 @@ export default async function ModerationPage() {
     );
   }
 
-  const [pendingReviews, bannedUsers, recentLogs] = await Promise.all([
+  const [pendingReviews, bannedUsers, recentLogs, professorSuggestions] = await Promise.all([
     prisma.review.findMany({
       where: { status: "PENDING" },
       include: {
@@ -39,6 +47,11 @@ export default async function ModerationPage() {
       orderBy: { createdAt: "desc" },
       take: 30,
       include: { actor: { select: { email: true } } },
+    }),
+    prisma.professorSuggestion.findMany({
+      where: { status: "OPEN", mentionCount: { gte: SUGGESTION_QUEUE_THRESHOLD } },
+      include: { course: { select: { code: true } } },
+      orderBy: { mentionCount: "desc" },
     }),
   ]);
 
@@ -102,6 +115,81 @@ export default async function ModerationPage() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+      </section>
+
+      <section className="border-b border-border py-8">
+        <h2 className="mb-4 text-xs uppercase tracking-wider text-text-muted">
+          Professor suggestions ({professorSuggestions.length})
+        </h2>
+        {professorSuggestions.length === 0 ? (
+          <p className="text-sm text-text-muted">
+            Nothing has crossed {SUGGESTION_QUEUE_THRESHOLD} mentions yet.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {professorSuggestions.map((s) => {
+              const { firstName, lastName } = splitDisplayName(s.displayName);
+              return (
+                <div key={s.id} className="border border-border bg-surface p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="font-num text-sm">
+                        &ldquo;{s.displayName}&rdquo; on {s.course.code}
+                      </p>
+                      <p className="font-num text-xs text-text-muted">
+                        Mentioned {s.mentionCount} time{s.mentionCount === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                    <ModActionButton
+                      label="Dismiss"
+                      tone="bad"
+                      confirmMessage="Dismiss this suggestion? It won't show up again unless mentioned again."
+                      action={dismissProfessorSuggestion.bind(null, s.id)}
+                    />
+                  </div>
+                  <form
+                    action={promoteProfessorSuggestion.bind(null, s.id)}
+                    className="mt-3 flex flex-wrap items-end gap-2 border-t border-border pt-3"
+                  >
+                    <label className="text-xs text-text-muted">
+                      First name
+                      <input
+                        name="firstName"
+                        defaultValue={firstName}
+                        required
+                        className="mt-1 block border border-border bg-bg px-2 py-1.5 text-sm text-text focus:border-accent focus:outline-none"
+                      />
+                    </label>
+                    <label className="text-xs text-text-muted">
+                      Last name
+                      <input
+                        name="lastName"
+                        defaultValue={lastName}
+                        required
+                        className="mt-1 block border border-border bg-bg px-2 py-1.5 text-sm text-text focus:border-accent focus:outline-none"
+                      />
+                    </label>
+                    <label className="text-xs text-text-muted">
+                      Title
+                      <input
+                        name="title"
+                        defaultValue="Professor"
+                        className="mt-1 block border border-border bg-bg px-2 py-1.5 text-sm text-text focus:border-accent focus:outline-none"
+                      />
+                    </label>
+                    <button
+                      type="submit"
+                      aria-label={`Create & link "${s.displayName}"`}
+                      className="font-num border border-good px-2.5 py-1.5 text-xs uppercase tracking-wider text-good hover:bg-good hover:text-ink"
+                    >
+                      Create &amp; link
+                    </button>
+                  </form>
+                </div>
+              );
+            })}
           </div>
         )}
       </section>
